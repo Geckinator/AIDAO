@@ -65,15 +65,15 @@ contract Word is usingOracalize {
 	    
 	    clock++;
 	}
-	
+	// sells word to the 'Economy' and subtracts the letters, it consists of, from the corresponding letter stock values
 	function sellWord(utf8[] _uniqueLetters, uint8[] _amounts) {
 	    for (uint8 t = 0; t < _uniqueLetters.length; t++) {
 	        Letter _letter = letterContracts[_uniqueLetters[t]];
 	        lettersInStock[_letter] -= _amounts[t];
-	        
 	    }
 	}
 	
+	// requests letters of certain amount
 	function order(Letter _letter, uint8 _orderSize) {
 	     letter.takeOrder();
 	}
@@ -117,6 +117,8 @@ contract Letter {
 	    }
 	}
 	
+	// check if order is ready and sell it to Word company
+	// returns 0 if no order is ready
 	function querySell(uint _time) returns(uint amount_) {
 	    if (_time - orderTimestamps[0] > productionTime) {
 	        amount_ = numberOfProductsOrdered[orderTimestamps[0]];
