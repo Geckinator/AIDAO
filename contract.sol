@@ -52,7 +52,7 @@ contract Word is usingOracalize {
 	}
 	
 	function order(Letter _letter, uint8 _orderSize) {
-		if (letter.lettersInProduction + _orderSize < letter.capacity) letter.takeOrder();
+		letter.takeOrder();
 	}
 }
 
@@ -81,11 +81,19 @@ contract Letter {
         price = _price;
     }
 	
-	function takeOrder(uint _currentTime, uint _orderSize) {
-	    orderTimestamps.pushback(_currentTime);
-	    numberOfProductsOrdered[_currentTime] = _orderSize;
+	// insert an order of specific ammount to the production queue if possible 	                                                                            
+	function takeOrder(uint _currentTime, uint _orderSize) {                    
+	    if lettersInProduction != capacity {                                    // check if production 'slots' are full
+	        if lettersInProduction + _orderSize < capacity {                    // order all requested
+	            orderTimestamps.pushback(_currentTime);                         // push to order queue
+	            numberOfProductsOrdered[_currentTime] = _orderSize;             // associate order with timestamp
+	        } else {                                                            // order as much as the remaining space allows
+	            orderTimestamps.pushback(_currentTime);                         
+	            numberOfProductsOrdered[_currenTime] = capacity - lettersInProduction // associate order with timestamp
+	        }
+	    }
 	}
-	
+
 	function querySell(uint _time) returns(uint amount_) {
 	    if (_time - orderTimestamps[0] > productionTime) {
 	        amount_ = numberOfProductsOrdered[orderTimestamps[0]];
