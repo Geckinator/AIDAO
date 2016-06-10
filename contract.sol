@@ -1,16 +1,18 @@
 import "usingOracalize.it/api.sol";
 
 contract Word is usingOracalize {
-    uint public clock;
-    address scamionContractAddress;
-    mapping (utf8 => uint) public lettersInStock;
-	mapping (utf8 => Letter) public letterContracts;
-	mapping (utf8 => address) public letterAddresses;
-	mapping (uint => string) public orders;
+    
+    uint public clock; /* Keeps track of current time */
+    address scamionContractAddress; /* Address of the scamion contract */
+    mapping (utf8 => uint) public lettersInStock; /* Current letters in stock ready to sell */
+	mapping (utf8 => Letter) public letterContracts; /* Reference list of all 26 letter contracts */
+	mapping (utf8 => address) public letterAddresses; /* Reference list of all 26 letter contract addresses, probably redundant and to be removed */
+	mapping (uint => string) public orders; /* Mapping of timestamps to the word ordered at that time */
 	
 	function Word(address _scamionContractAddress) {
 	    clock = 0;
 	    scamionContractAddress = _scamionContractAddress;
+	    /* Initialize all letter contracts */
 	    for (utf8 letter = 'a'; letter <= 'z'; letter++) {
 	        letterContracts[letter] = new Letter(letter, 10, 25, 0.2);
 	        lettersInStock[letter] = 0;
@@ -21,6 +23,7 @@ contract Word is usingOracalize {
 	    uint8 c = 0;
 	    for (utf8 letter = 'a'; letter <= 'z'; letter++) {
 	        letterAddresses[letter] = _letterAddresses[c];
+	        c++;
 	    }
 	}
 	
@@ -28,16 +31,28 @@ contract Word is usingOracalize {
 	    if (msg.sender != oracalize_cbAddress()) throw;
 	}
 	
-	function tickTime(string _currentWord) {
+	/* tickTime is run at each time step, places new order and checks if previous
+	orders have been fulfilled before incrementing time. Inputs are a list of unique
+	letters in the current word, along with their number of instances in the same order */
+	function tickTime(utf8[] _uniqueLetters, uint8[] _amounts) {
 	    
-	    bytes _word = bytes(_currentWord);
-	    uint8 t = 0;
-	    for (uint8 t = 0; t < _word.length; t++) {
-	        _letter = letterContracts[_word[t]];
-	        _letter.demand++;
-	        order(_letter, 1);
+	    
+	    // Check to see if incoming word is in stock, otherwise place an order.
+	    var readyToShip = true;
+	    for (uint8 t = 0; t < _uniqueLetters.length; t++) {
+	        var _amountToOrder = _amounts[t] - _lettersInStock[_uniqueLetters[t]];
+	        if (_amountToOrder > 0) {
+	            readyToShip = false;
+	            Letter _letter = letterContracts[_uniqueLetters[t]];
+	            order(_letter, _amountToOrder);
+	            _letter.demand += _amountToOrder;
+	        }
+	    }
+	    if (readyToShip) {
+	        sellWord(_uniqueLetters, _amounts);
 	    }
 	    
+	    // Now check if any previous orders are ready to be shipped to the word contract
 	    for (utf8 letter = 'a'; letter <= 'z'; letter++) {
 	        Letter currentLetter = letterContracts[letter];
 	        
@@ -48,23 +63,31 @@ contract Word is usingOracalize {
 	        }
 	    }
 	    
-	    clock += 1;
+	    clock++;
+	}
+	
+	function sellWord(utf8[] _uniqueLetters, uint8[] _amounts) {
+	    for (uint8 t = 0; t < _uniqueLetters.length; t++) {
+	        Letter _letter = letterContracts[_uniqueLetters[t]];
+	        lettersInStock[_letter] -= _amounts[t];
+	        
+	    }
 	}
 	
 	function order(Letter _letter, uint8 _orderSize) {
-		letter.takeOrder();
+	     letter.takeOrder();
 	}
 }
 
 contract Letter {
     string public symbol;
-	uint public productionTime
-    uint public demand;
-    uint public capacity;
-    uint public lettersInProduction;
-	ufixed public price;
-	uint[] public orderTimestamps;
-	mapping (uint => uint8) public numberOfProductsOrdered;
+	uint public productionTime; // Time it takes to produce an order
+    uint public demand; // Current demand of product
+    uint public capacity; // The production capacity, how many products can be produced at once
+    uint public lettersInProduction; // How many letters are currently in production
+	ufixed public price; // Cost per unit
+	uint[] public orderTimestamps; // Stack of times an order was placed
+	mapping (uint => uint8) public numberOfProductsOrdered; // Mapping from order timestamps to number of products requested
     
     function Letter(string _symbol, uint _productionTime, uint _capacity, ufixed _price) {
         demand = 0;
@@ -89,11 +112,11 @@ contract Letter {
 	            numberOfProductsOrdered[_currentTime] = _orderSize;             // associate order with timestamp
 	        } else {                                                            // order as much as the remaining space allows
 	            orderTimestamps.pushback(_currentTime);                         
-	            numberOfProductsOrdered[_currenTime] = capacity - lettersInProduction // associate order with timestamp
+	            numberOfProductsOrdered[_currenTime] = capacity - lettersInProduction; // associate order with timestamp
 	        }
 	    }
 	}
-
+	
 	function querySell(uint _time) returns(uint amount_) {
 	    if (_time - orderTimestamps[0] > productionTime) {
 	        amount_ = numberOfProductsOrdered[orderTimestamps[0]];
@@ -105,6 +128,11 @@ contract Letter {
 	    }
 	}
 	
+}
+
+// This contract plays the economy buy paying for words and getting paid by letter companies because that's how it works.
+contract Economy {
+    
 }
 
 contract owned {
