@@ -1,0 +1,59 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/nodejs',
+1 verbose cli   '/usr/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   'web3',
+1 verbose cli   '~/AIDAO/oracle' ]
+2 info using npm@3.5.2
+3 info using node@v4.2.6
+4 verbose config Skipping project config: /home/kingkongkai/.npmrc. (matches userconfig)
+5 silly loadCurrentTree Starting
+6 silly install loadCurrentTree
+7 silly install readLocalPackageData
+8 silly fetchPackageMetaData web3
+9 silly fetchPackageMetaData ~/AIDAO/oracle
+10 silly fetchNamedPackageData web3
+11 silly mapToRegistry name web3
+12 silly mapToRegistry using default registry
+13 silly mapToRegistry registry https://registry.npmjs.org/
+14 silly mapToRegistry uri https://registry.npmjs.org/web3
+15 silly fetchOtherPackageData ~/AIDAO/oracle
+16 silly cache add args [ '~/AIDAO/oracle', null ]
+17 verbose cache add spec ~/AIDAO/oracle
+18 silly cache add parsed spec Result {
+18 silly cache add   raw: '~/AIDAO/oracle',
+18 silly cache add   scope: null,
+18 silly cache add   name: null,
+18 silly cache add   rawSpec: '~/AIDAO/oracle',
+18 silly cache add   spec: '/home/kingkongkai/AIDAO/oracle/~/AIDAO/oracle',
+18 silly cache add   type: 'local' }
+19 error addLocal Could not install /home/kingkongkai/AIDAO/oracle/~/AIDAO/oracle
+20 silly fetchPackageMetaData Error: ENOENT: no such file or directory, open '/home/kingkongkai/AIDAO/oracle/~/AIDAO/oracle'
+20 silly fetchPackageMetaData     at Error (native)
+20 silly fetchPackageMetaData  error for ~/AIDAO/oracle { [Error: ENOENT: no such file or directory, open '/home/kingkongkai/AIDAO/oracle/~/AIDAO/oracle']
+20 silly fetchPackageMetaData   errno: -2,
+20 silly fetchPackageMetaData   code: 'ENOENT',
+20 silly fetchPackageMetaData   syscall: 'open',
+20 silly fetchPackageMetaData   path: '/home/kingkongkai/AIDAO/oracle/~/AIDAO/oracle' }
+21 verbose get https://registry.npmjs.org/web3 not expired, no request
+22 silly rollbackFailedOptional Starting
+23 silly rollbackFailedOptional Finishing
+24 silly runTopLevelLifecycles Starting
+25 silly runTopLevelLifecycles Finishing
+26 silly install printInstalled
+27 verbose stack Error: ENOENT: no such file or directory, open '/home/kingkongkai/AIDAO/oracle/~/AIDAO/oracle'
+27 verbose stack     at Error (native)
+28 verbose cwd /home/kingkongkai/AIDAO/oracle
+29 error Linux 4.4.0-22-generic
+30 error argv "/usr/bin/nodejs" "/usr/bin/npm" "install" "web3" "~/AIDAO/oracle"
+31 error node v4.2.6
+32 error npm  v3.5.2
+33 error path /home/kingkongkai/AIDAO/oracle/~/AIDAO/oracle
+34 error code ENOENT
+35 error errno -2
+36 error syscall open
+37 error enoent ENOENT: no such file or directory, open '/home/kingkongkai/AIDAO/oracle/~/AIDAO/oracle'
+38 error enoent ENOENT: no such file or directory, open '/home/kingkongkai/AIDAO/oracle/~/AIDAO/oracle'
+38 error enoent This is most likely not a problem with npm itself
+38 error enoent and is related to npm not being able to find a file.
+39 verbose exit [ -2, true ]
