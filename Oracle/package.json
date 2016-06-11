@@ -1,0 +1,19 @@
+{
+  "name": "what",
+  "version": "1.0.0",
+  "description": "Oracle Eth Access",
+  "main": "index.js",
+  "scripts": {
+    "test": "eth_access"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "python-shell": "^0.4.0",
+    "web3": "^0.17.0-alpha"
+  },
+  "bin": {
+    "snippet": "./index.js"
+  }
+}
