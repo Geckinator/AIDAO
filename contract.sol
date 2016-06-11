@@ -1,124 +1,136 @@
-import "usingOracalize.it/api.sol";
+contract Word {
 
-contract Word is usingOracalize {
-    
     uint public clock; /* Keeps track of current time */
     address scamionContractAddress; /* Address of the scamion contract */
-    mapping (utf8 => uint) public lettersInStock; /* Current letters in stock ready to sell */
-	mapping (utf8 => Letter) public letterContracts; /* Reference list of all 26 letter contracts */
-	mapping (utf8 => address) public letterAddresses; /* Reference list of all 26 letter contract addresses, probably redundant and to be removed */
+    Economy wordMarket;
+    
+    mapping (byte => uint8) public lettersInStock; /* Current letters in stock ready to sell */
+	mapping (byte => Letter) public letterContracts; /* Reference list of all 26 letter contracts */
 	mapping (uint => string) public orders; /* Mapping of timestamps to the word ordered at that time */
 	
 	function Word(address _scamionContractAddress) {
 	    clock = 0;
 	    scamionContractAddress = _scamionContractAddress;
+	    wordMarket = new Economy(scamionContractAddress);
 	    /* Initialize all letter contracts */
-	    for (utf8 letter = 'a'; letter <= 'z'; letter++) {
-	        letterContracts[letter] = new Letter(letter, 10, 25, 0.2);
-	        lettersInStock[letter] = 0;
+	    for (uint8 l = 65; l <= 122; l++) {
+	        letterContracts[byte(l)] = new Letter(byte(l), scamionContractAddress, 10, 25);
+	        lettersInStock[byte(l)] = 0;
 	    }
-	}
-	
-	function setLetterAddresses(address[] _letterAddresses) {
-	    uint8 c = 0;
-	    for (utf8 letter = 'a'; letter <= 'z'; letter++) {
-	        letterAddresses[letter] = _letterAddresses[c];
-	        c++;
-	    }
-	}
-	
-	function __callback() {
-	    if (msg.sender != oracalize_cbAddress()) throw;
 	}
 	
 	/* tickTime is run at each time step, places new order and checks if previous
 	orders have been fulfilled before incrementing time. Inputs are a list of unique
 	letters in the current word, along with their number of instances in the same order */
-	function tickTime(utf8[] _uniqueLetters, uint8[] _amounts) {
+	function tickTime(bytes _uniqueLetters, uint8[] _amounts) {
 	    
-	    
-	    // Check to see if incoming word is in stock, otherwise place an order.
-	    var readyToShip = true;
+	    // Check to see if incoming word is in stack, otherwise place an order.
+	    var _readyToShip = true;
 	    for (uint8 t = 0; t < _uniqueLetters.length; t++) {
-	        var _amountToOrder = _amounts[t] - _lettersInStock[_uniqueLetters[t]];
+	        var _amountToOrder = _amounts[t] - lettersInStock[_uniqueLetters[t]];
 	        if (_amountToOrder > 0) {
-	            readyToShip = false;
+	            _readyToShip = false;
 	            Letter _letter = letterContracts[_uniqueLetters[t]];
 	            order(_letter, _amountToOrder);
-	            _letter.demand += _amountToOrder;
+	            _letter.incrementDemand(uint(_amountToOrder));
 	        }
 	    }
-	    if (readyToShip) {
+	    if (_readyToShip) {
 	        sellWord(_uniqueLetters, _amounts);
 	    }
 	    
 	    // Now check if any previous orders are ready to be shipped to the word contract
-	    for (utf8 letter = 'a'; letter <= 'z'; letter++) {
-	        Letter currentLetter = letterContracts[letter];
+	    for (uint8 l = 65; l <= 122; l++) {
+	        Letter currentLetter = letterContracts[byte(l)];
 	        
-	        uint amount_ = letterContracts[letter].querySell(clock);
+	        uint amount_ = currentLetter.querySell(clock);
+	        uint a = 3;
 	        if (amount_ > 0) {
 	            Scamions s = Scamions(scamionContractAddress);
-	            s.transfer(letter.self, Math.round(amount_ * letter.price));
+	            s.transfer(currentLetter, amount_ * (2*currentLetter.getDemand() - amount_ + 1) / 2);
 	        }
+	    }
+	    
+	    // Send some money back into the economy
+	    for (l = 65; l <= 122; l++) {
+	        letterContracts[byte(l)].payBackToEconomy(wordMarket);
 	    }
 	    
 	    clock++;
 	}
-	// sells word to the 'Economy' and subtracts the letters, it consists of, from the corresponding letter stock values
-	function sellWord(utf8[] _uniqueLetters, uint8[] _amounts) {
+	
+	function returnInt() returns(uint number){
+	    return 4;
+	}
+	
+	function sellWord(bytes _uniqueLetters, uint8[] _amounts) {
+	    var _valueOfWords = 0.0;
 	    for (uint8 t = 0; t < _uniqueLetters.length; t++) {
 	        Letter _letter = letterContracts[_uniqueLetters[t]];
-	        lettersInStock[_letter] -= _amounts[t];
+	        lettersInStock[_letter.getSymbol()] -= _amounts[t];
+	        _valueOfWords += _amounts[t];
 	    }
+	    wordMarket.buyWord(msg.sender, _valueOfWords);
 	}
 	
 	// requests letters of certain amount
 	function order(Letter _letter, uint8 _orderSize) {
-	     letter.takeOrder();
+	     _letter.takeOrder(clock, _orderSize);
 	}
 }
 
 contract Letter {
-    string public symbol;
+    byte public symbol;
+    address scamionContractAddress;
 	uint public productionTime; // Time it takes to produce an order
     uint public demand; // Current demand of product
     uint public capacity; // The production capacity, how many products can be produced at once
     uint public lettersInProduction; // How many letters are currently in production
-	ufixed public price; // Cost per unit
+    
 	uint[] public orderTimestamps; // Stack of times an order was placed
+	
 	mapping (uint => uint8) public numberOfProductsOrdered; // Mapping from order timestamps to number of products requested
     
-    function Letter(string _symbol, uint _productionTime, uint _capacity, ufixed _price) {
+    function Letter(
+        byte _symbol,
+        address _scamionContractAddress,
+        uint _productionTime,
+        uint _capacity
+        ) {
         demand = 0;
         lettersInProduction = 0;
+        scamionContractAddress = _scamionContractAddress;
         symbol = _symbol;
         productionTime = _productionTime;
         capacity = _capacity;
-        price = _price;
     }
     
-    function setSpecs(uint _productionTime, uint _capacity, ufixed _price) {
+    function getDemand() returns(uint a) {
+        return demand;
+    }
+    
+    function getSymbol() returns(byte s) {
+        return symbol;
+    }
+   
+    function setSpecs(uint _productionTime, uint _capacity) {
         productionTime = _productionTime;
         capacity = _capacity;
-        price = _price;
     }
 	
-	// insert an order of specific ammount to the production queue if possible 	                                                                            
-	function takeOrder(uint _currentTime, uint _orderSize) {                    
-	    if lettersInProduction != capacity {                                    // check if production 'slots' are full
-	        if lettersInProduction + _orderSize < capacity {                    // order all requested
-	            orderTimestamps.pushback(_currentTime);                         // push to order queue
+    // insert an order of specific ammount to the production queue if possible 	                                                                            
+	function takeOrder(uint _currentTime, uint8 _orderSize) {                    
+	    if (lettersInProduction != capacity) {                                    // check if production 'slots' are full
+	        if (lettersInProduction + _orderSize < capacity) {                    // order all requested
+	            orderTimestamps.push(_currentTime);                         // push to order queue
 	            numberOfProductsOrdered[_currentTime] = _orderSize;             // associate order with timestamp
 	        } else {                                                            // order as much as the remaining space allows
-	            orderTimestamps.pushback(_currentTime);                         
-	            numberOfProductsOrdered[_currenTime] = capacity - lettersInProduction; // associate order with timestamp
+	            orderTimestamps.push(_currentTime);
+	            numberOfProductsOrdered[_currentTime] = uint8(capacity - lettersInProduction); // associate order with timestamp
 	        }
 	    }
 	}
 	
-	// check if order is ready and sell it to Word company
-	// returns 0 if no order is ready
 	function querySell(uint _time) returns(uint amount_) {
 	    if (_time - orderTimestamps[0] > productionTime) {
 	        amount_ = numberOfProductsOrdered[orderTimestamps[0]];
@@ -130,6 +142,29 @@ contract Letter {
 	    }
 	}
 	
+	function payBackToEconomy(address _economy) {
+	    Scamions s = Scamions(scamionContractAddress);
+	    s.transfer(_economy, demand);
+	}
+	
+	function incrementDemand(uint amount) {
+	    demand += amount;
+	}
+	
+}
+
+// This contract plays the economy buy paying for words and getting paid by letter companies because that's how it works.
+contract Economy {
+    address scamionContractAddress; /* Address of the scamion contract */
+    
+    function Economy(address _scamionContractAddress) {
+        scamionContractAddress = _scamionContractAddress;
+    }
+    
+    function buyWord(address seller, uint _cost) {
+        Scamions s = Scamions(scamionContractAddress);
+        s.transfer(seller, _cost);
+    }
 }
 
 // This contract plays the economy buy paying for words and getting paid by letter companies because that's how it works.
@@ -207,9 +242,9 @@ contract token {
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
         if (balanceOf[_from] < _value) throw;                 // Check if the sender has enough
         if (balanceOf[_to] + _value < balanceOf[_to]) throw;  // Check for overflows
-        if (_value > allowance[_from][msg.sender]) throw;   // Check allowance
-        balanceOf[_from] -= _value;                          // Subtract from the sender
-        balanceOf[_to] += _value;                            // Add the same to the recipient
+        if (_value > allowance[_from][msg.sender]) throw;     // Check allowance
+        balanceOf[_from] -= _value;                           // Subtract from the sender
+        balanceOf[_to] += _value;                             // Add the same to the recipient
         allowance[_from][msg.sender] -= _value;
         Transfer(_from, _to, _value);
         return true;
