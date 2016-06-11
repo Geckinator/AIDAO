@@ -1,12 +1,18 @@
 contract Word {
 
-    uint public clock; /* Keeps track of current time */
-    address scamionContractAddress; /* Address of the scamion contract */
-    Economy wordMarket;
+    uint public clock;                                      // Keeps track of current time.
+    address scamionContractAddress;                         // Address of the scamion contract.
+    Economy wordMarket;                                     // A representation of the market.
     
-    mapping (byte => uint8) public lettersInStock; /* Current letters in stock ready to sell */
-	mapping (byte => Letter) public letterContracts; /* Reference list of all 26 letter contracts */
-	mapping (uint => string) public orders; /* Mapping of timestamps to the word ordered at that time */
+    struct Order {
+        bytes uniqueLetters;
+        uint8[] amounts;
+    }
+    
+    uint[] public orderTimestamps;                          // Stack of times an order was placed.
+    mapping (byte => uint8) public lettersInStock;          // Current letters in stock ready to sell.
+	mapping (byte => Letter) public letterContracts;        // Reference list of all 26 letter contracts.
+	mapping (uint => Order) public orders;                  // Mapping of timestamps to the word ordered at that time.
 	
 	function Word(address _scamionContractAddress) {
 	    clock = 0;
@@ -19,64 +25,85 @@ contract Word {
 	    }
 	}
 	
+	function shipWord(bytes _uniqueLetters, uint8[] _amounts) {
+	    for (uint8 t = 0; t < _uniqueLetters.length; t++) {
+	        Letter _letter = letterContracts[_uniqueLetters[t]];
+	        lettersInStock[_letter.getSymbol()] -= _amounts[t];
+	    }
+	}
+	
+	// requests letters of certain amount
+	function order(Letter _letter, uint8 _orderSize) {
+	    var cost_ = _letter.takeOrder(clock, _orderSize);
+	    Scamions s = Scamions(scamionContractAddress);
+	    s.transfer(_letter, cost_);
+	}
+	
 	/* tickTime is run at each time step, places new order and checks if previous
 	orders have been fulfilled before incrementing time. Inputs are a list of unique
 	letters in the current word, along with their number of instances in the same order */
 	function tickTime(bytes _uniqueLetters, uint8[] _amounts) {
 	    
-	    // Check to see if incoming word is in stack, otherwise place an order.
-	    var _readyToShip = true;
+	    // First check if any previous letter orders are ready to be shipped to the word contract.
+	    for (uint8 l = 65; l <= 122; l++) {
+	        letterContracts[byte(l)].queryShip(clock);
+	    }
+	    
+	    // Then take care of current order.
+	    uint _valueOfWord = 0;                                                      // Price of the incoming order to be payed at order time.
+	    var _readyToShip = true;                                                    // Check to see if incoming word is already in stack.
 	    for (uint8 t = 0; t < _uniqueLetters.length; t++) {
-	        var _amountToOrder = _amounts[t] - lettersInStock[_uniqueLetters[t]];
-	        if (_amountToOrder > 0) {
-	            _readyToShip = false;
+	        _valueOfWord += letterContracts[byte(t)].getDemand() * _amounts[t];     // Increment price according to current demand of letter.
+	        var _amountToOrder = _amounts[t] - lettersInStock[_uniqueLetters[t]];   // See how many additional letters must be ordered.
+	        if (_amountToOrder > 0) {                                               // Place order if needed.
+	            _readyToShip = false;                                               // In which case order is not ready for shipment.
 	            Letter _letter = letterContracts[_uniqueLetters[t]];
 	            order(_letter, _amountToOrder);
-	            _letter.incrementDemand(uint(_amountToOrder));
+	            _letter.incrementDemand(uint(_amountToOrder));                      // Increment the demand.
+	            
 	        }
 	    }
+	    wordMarket.payForWord(msg.sender, _valueOfWord);                            // The word is paid for.
 	    if (_readyToShip) {
-	        sellWord(_uniqueLetters, _amounts);
+	        shipWord(_uniqueLetters, _amounts);                                     // And shipped if possible.
+	    }
+	    else {                                                                      // Otherwise order is stored to be checked again later.
+	        Order memory newOrder = Order({uniqueLetters: _uniqueLetters, amounts: _amounts});
+	        orders[clock] = newOrder;
+	        orderTimestamps.push(clock);
 	    }
 	    
-	    // Now check if any previous orders are ready to be shipped to the word contract
-	    for (uint8 l = 65; l <= 122; l++) {
-	        Letter currentLetter = letterContracts[byte(l)];
-	        
-	        uint amount_ = currentLetter.querySell(clock);
-	        uint a = 3;
-	        if (amount_ > 0) {
-	            Scamions s = Scamions(scamionContractAddress);
-	            s.transfer(currentLetter, amount_ * (2*currentLetter.getDemand() - amount_ + 1) / 2);
+	    // Now see if any previous orders can be shipped.
+	    uint[] memory tempOrderTimestamps = new uint[](orderTimestamps.length);     // Maintain the orders that still aren't met.
+	    uint8 k = 0;
+	    for (uint8 i = 0; i < orderTimestamps.length; i++) {                        // Iterate through all the timestamps of remaining orders.
+	        _readyToShip = true;                                                    // Use  a flag to see if all the needed letters are present.
+	        Order order_ = orders[orderTimestamps[i]];                              // Get one of the orders.
+	        for (uint8 j = 0; j < order_.amounts.length; j++) {                     // Loop through the letters needed for this order.
+	            if (lettersInStock[order_.uniqueLetters[j]] < order_.amounts[j]) {  // Check and see if we have enough letters in stock.
+	                _readyToShip = false;                                           // If not, then cancel shipping.
+	                break;
+	            }
+	        }
+	        if (_readyToShip) {
+	            shipWord(order_.uniqueLetters, order_.amounts);                     // Ship word if it passed the test.
+	            delete orders[orderTimestamps[i]];                                  // Delete its corresponding order.
+	        }
+	        else {
+	            tempOrderTimestamps[k] = orderTimestamps[i];                        // Otherwise, copy order time into new list for future indexing.
+	            k++;
 	        }
 	    }
+	    orderTimestamps = tempOrderTimestamps;
 	    
-	    // Send some money back into the economy
+	    // Send some money back into the economy.
 	    for (l = 65; l <= 122; l++) {
 	        letterContracts[byte(l)].payBackToEconomy(wordMarket);
 	    }
 	    
 	    clock++;
-	}
-	
-	function returnInt() returns(uint number){
-	    return 4;
-	}
-	
-	function sellWord(bytes _uniqueLetters, uint8[] _amounts) {
-	    var _valueOfWords = 0.0;
-	    for (uint8 t = 0; t < _uniqueLetters.length; t++) {
-	        Letter _letter = letterContracts[_uniqueLetters[t]];
-	        lettersInStock[_letter.getSymbol()] -= _amounts[t];
-	        _valueOfWords += _amounts[t];
-	    }
-	    wordMarket.buyWord(msg.sender, _valueOfWords);
-	}
-	
-	// requests letters of certain amount
-	function order(Letter _letter, uint8 _orderSize) {
-	     _letter.takeOrder(clock, _orderSize);
-	}
+}
+
 }
 
 contract Letter {
@@ -119,26 +146,30 @@ contract Letter {
     }
 	
     // insert an order of specific ammount to the production queue if possible 	                                                                            
-	function takeOrder(uint _currentTime, uint8 _orderSize) {                    
+	function takeOrder(uint _currentTime, uint8 _orderSize) returns(uint8 amountOrdered) {                    
 	    if (lettersInProduction != capacity) {                                    // check if production 'slots' are full
+	        orderTimestamps.push(_currentTime);  
 	        if (lettersInProduction + _orderSize < capacity) {                    // order all requested
-	            orderTimestamps.push(_currentTime);                         // push to order queue
 	            numberOfProductsOrdered[_currentTime] = _orderSize;             // associate order with timestamp
-	        } else {                                                            // order as much as the remaining space allows
-	            orderTimestamps.push(_currentTime);
+	            return _orderSize;
+	        }
+	        else {                                                            // order as much as the remaining space allows
 	            numberOfProductsOrdered[_currentTime] = uint8(capacity - lettersInProduction); // associate order with timestamp
+	            return uint8(capacity - lettersInProduction);
 	        }
 	    }
+	    return 0;
 	}
 	
-	function querySell(uint _time) returns(uint amount_) {
+	function queryShip(uint _time) {
 	    if (_time - orderTimestamps[0] > productionTime) {
-	        amount_ = numberOfProductsOrdered[orderTimestamps[0]];
-	        delete orderTimestamps[0];
-	        demand -= amount_;
-	    }
-	    else {
-	        amount_ = 0;
+	        uint[] memory _tempOrderTimestamps = new uint[](orderTimestamps.length - 1);
+	        for (uint i = 1; i < orderTimestamps.length; i++) {
+	            _tempOrderTimestamps[i - 1] = orderTimestamps[i];
+	        }
+	        delete orderTimestamps;
+	        orderTimestamps = _tempOrderTimestamps;
+	        demand -= numberOfProductsOrdered[orderTimestamps[0]];
 	    }
 	}
 	
@@ -161,15 +192,10 @@ contract Economy {
         scamionContractAddress = _scamionContractAddress;
     }
     
-    function buyWord(address seller, uint _cost) {
+    function payForWord(address seller, uint _cost) {
         Scamions s = Scamions(scamionContractAddress);
         s.transfer(seller, _cost);
     }
-}
-
-// This contract plays the economy buy paying for words and getting paid by letter companies because that's how it works.
-contract Economy {
-    
 }
 
 contract owned {
