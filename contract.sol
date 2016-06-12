@@ -1,18 +1,18 @@
 contract Word {
 
-    uint public clock;                                      // Keeps track of current time.
-    address scamionContractAddress;                         // Address of the scamion contract.
-    Economy wordMarket;                                     // A representation of the market.
+    uint public clock;                                      /* Keeps track of current time. */
+    address scamionContractAddress;                         /* Address of the scamion contract. */
+    Economy wordMarket;                                     /* A representation of the market. */
     
     struct Order {
         bytes uniqueLetters;
         uint8[] amounts;
     }
     
-    uint[] public orderTimestamps;                          // Stack of times an order was placed.
-    mapping (byte => uint8) public lettersInStock;          // Current letters in stock ready to sell.
-	mapping (byte => Letter) public letterContracts;        // Reference list of all 26 letter contracts.
-	mapping (uint => Order) public orders;                  // Mapping of timestamps to the word ordered at that time.
+    uint[] public orderTimestamps;                          /* Stack of times an order was placed. */
+    mapping (byte => uint8) public lettersInStock;          /* Current letters in stock ready to sell. */
+	mapping (byte => Letter) public letterContracts;        /* Reference list of all 26 letter contracts. */
+	mapping (uint => Order) public orders;                  /* Mapping of timestamps to the word ordered at that time. */
 	
 	function Word(address _scamionContractAddress) {
 	    clock = 0;
@@ -32,7 +32,7 @@ contract Word {
 	    }
 	}
 	
-	// requests letters of certain amount
+	/* requests letters of certain amount */
 	function order(Letter _letter, uint8 _orderSize) {
 	    var cost_ = _letter.takeOrder(clock, _orderSize);
 	    Scamions s = Scamions(scamionContractAddress);
@@ -44,59 +44,59 @@ contract Word {
 	letters in the current word, along with their number of instances in the same order */
 	function tickTime(bytes _uniqueLetters, uint8[] _amounts) {
 	    
-	    // First check if any previous letter orders are ready to be shipped to the word contract.
+	    /* First check if any previous letter orders are ready to be shipped to the word contract. */
 	    for (uint8 l = 65; l <= 122; l++) {
 	        letterContracts[byte(l)].queryShip(clock);
 	    }
 	    
-	    // Then take care of current order.
-	    uint _valueOfWord = 0;                                                      // Price of the incoming order to be payed at order time.
-	    var _readyToShip = true;                                                    // Check to see if incoming word is already in stack.
+	    /* Then take care of current order. */
+	    uint _valueOfWord = 0;                                                      /* Price of the incoming order to be payed at order time. */
+	    var _readyToShip = true;                                                    /* Check to see if incoming word is already in stack. */
 	    for (uint8 t = 0; t < _uniqueLetters.length; t++) {
-	        _valueOfWord += letterContracts[byte(t)].getDemand() * _amounts[t];     // Increment price according to current demand of letter.
-	        var _amountToOrder = _amounts[t] - lettersInStock[_uniqueLetters[t]];   // See how many additional letters must be ordered.
-	        if (_amountToOrder > 0) {                                               // Place order if needed.
-	            _readyToShip = false;                                               // In which case order is not ready for shipment.
+	        _valueOfWord += letterContracts[byte(t)].getDemand() * _amounts[t];     /* Increment price according to current demand of letter. */
+	        var _amountToOrder = _amounts[t] - lettersInStock[_uniqueLetters[t]];   /* See how many additional letters must be ordered. */
+	        if (_amountToOrder > 0) {                                               /* Place order if needed. */
+	            _readyToShip = false;                                               /* In which case order is not ready for shipment. */
 	            Letter _letter = letterContracts[_uniqueLetters[t]];
 	            order(_letter, _amountToOrder);
-	            _letter.incrementDemand(uint(_amountToOrder));                      // Increment the demand.
+	            _letter.incrementDemand(uint(_amountToOrder));                      /* Increment the demand. */
 	            
 	        }
 	    }
-	    wordMarket.payForWord(msg.sender, _valueOfWord);                            // The word is paid for.
+	    wordMarket.payForWord(msg.sender, _valueOfWord);                            /* The word is paid for. */
 	    if (_readyToShip) {
-	        shipWord(_uniqueLetters, _amounts);                                     // And shipped if possible.
+	        shipWord(_uniqueLetters, _amounts);                                     /* And shipped if possible. */
 	    }
-	    else {                                                                      // Otherwise order is stored to be checked again later.
+	    else {                                                                      /* Otherwise order is stored to be checked again later. */
 	        Order memory newOrder = Order({uniqueLetters: _uniqueLetters, amounts: _amounts});
 	        orders[clock] = newOrder;
 	        orderTimestamps.push(clock);
 	    }
 	    
-	    // Now see if any previous orders can be shipped.
-	    uint[] memory tempOrderTimestamps = new uint[](orderTimestamps.length);     // Maintain the orders that still aren't met.
+	    /* Now see if any previous orders can be shipped. */
+	    uint[] memory tempOrderTimestamps = new uint[](orderTimestamps.length);     /* Maintain the orders that still aren't met. */
 	    uint8 k = 0;
-	    for (uint8 i = 0; i < orderTimestamps.length; i++) {                        // Iterate through all the timestamps of remaining orders.
-	        _readyToShip = true;                                                    // Use  a flag to see if all the needed letters are present.
-	        Order order_ = orders[orderTimestamps[i]];                              // Get one of the orders.
-	        for (uint8 j = 0; j < order_.amounts.length; j++) {                     // Loop through the letters needed for this order.
-	            if (lettersInStock[order_.uniqueLetters[j]] < order_.amounts[j]) {  // Check and see if we have enough letters in stock.
-	                _readyToShip = false;                                           // If not, then cancel shipping.
+	    for (uint8 i = 0; i < orderTimestamps.length; i++) {                        /* Iterate through all the timestamps of remaining orders. */
+	        _readyToShip = true;                                                    /* Use  a flag to see if all the needed letters are present. */
+	        Order order_ = orders[orderTimestamps[i]];                              /* Get one of the orders. */
+	        for (uint8 j = 0; j < order_.amounts.length; j++) {                     /* Loop through the letters needed for this order. */
+	            if (lettersInStock[order_.uniqueLetters[j]] < order_.amounts[j]) {  /* Check and see if we have enough letters in stock. */
+	                _readyToShip = false;                                           /* If not, then cancel shipping. */
 	                break;
 	            }
 	        }
 	        if (_readyToShip) {
-	            shipWord(order_.uniqueLetters, order_.amounts);                     // Ship word if it passed the test.
-	            delete orders[orderTimestamps[i]];                                  // Delete its corresponding order.
+	            shipWord(order_.uniqueLetters, order_.amounts);                     /* Ship word if it passed the test. */
+	            delete orders[orderTimestamps[i]];                                  /* Delete its corresponding order. */
 	        }
 	        else {
-	            tempOrderTimestamps[k] = orderTimestamps[i];                        // Otherwise, copy order time into new list for future indexing.
+	            tempOrderTimestamps[k] = orderTimestamps[i];                        /* Otherwise, copy order time into new list for future indexing. */
 	            k++;
 	        }
 	    }
 	    orderTimestamps = tempOrderTimestamps;
 	    
-	    // Send some money back into the economy.
+	    /* Send some money back into the economy. */
 	    for (l = 65; l <= 122; l++) {
 	        letterContracts[byte(l)].payBackToEconomy(wordMarket);
 	    }
@@ -109,14 +109,14 @@ contract Word {
 contract Letter {
     byte public symbol;
     address scamionContractAddress;
-	uint public productionTime; // Time it takes to produce an order
-    uint public demand; // Current demand of product
-    uint public capacity; // The production capacity, how many products can be produced at once
-    uint public lettersInProduction; // How many letters are currently in production
+	uint public productionTime;                                 /* Time it takes to produce an order */
+    uint public demand;                                         /* Current demand of product */
+    uint public capacity;                                       /* The production capacity, how many products can be produced at once */
+    uint public lettersInProduction;                            /* How many letters are currently in production */
     
-	uint[] public orderTimestamps; // Stack of times an order was placed
+	uint[] public orderTimestamps;                              /* Stack of times an order was placed */
 	
-	mapping (uint => uint8) public numberOfProductsOrdered; // Mapping from order timestamps to number of products requested
+	mapping (uint => uint8) public numberOfProductsOrdered;     /* Mapping from order timestamps to number of products requested */
     
     function Letter(
         byte _symbol,
@@ -145,16 +145,16 @@ contract Letter {
         capacity = _capacity;
     }
 	
-    // insert an order of specific ammount to the production queue if possible 	                                                                            
+    /* insert an order of specific ammount to the production queue if possible 	*/                                                                   
 	function takeOrder(uint _currentTime, uint8 _orderSize) returns(uint8 amountOrdered) {                    
-	    if (lettersInProduction != capacity) {                                    // check if production 'slots' are full
+	    if (lettersInProduction != capacity) {                                    /* check if production 'slots' are full */
 	        orderTimestamps.push(_currentTime);  
-	        if (lettersInProduction + _orderSize < capacity) {                    // order all requested
-	            numberOfProductsOrdered[_currentTime] = _orderSize;             // associate order with timestamp
+	        if (lettersInProduction + _orderSize < capacity) {                    /* order all requested */
+	            numberOfProductsOrdered[_currentTime] = _orderSize;             /* associate order with timestamp */
 	            return _orderSize;
 	        }
-	        else {                                                            // order as much as the remaining space allows
-	            numberOfProductsOrdered[_currentTime] = uint8(capacity - lettersInProduction); // associate order with timestamp
+	        else {                                                            /* order as much as the remaining space allows */
+	            numberOfProductsOrdered[_currentTime] = uint8(capacity - lettersInProduction); /* associate order with timestamp */
 	            return uint8(capacity - lettersInProduction);
 	        }
 	    }
@@ -184,7 +184,7 @@ contract Letter {
 	
 }
 
-// This contract plays the economy buy paying for words and getting paid by letter companies because that's how it works.
+/* This contract plays the economy buy paying for words and getting paid by letter companies because that's how it works. */
 contract Economy {
     address scamionContractAddress; /* Address of the scamion contract */
     
@@ -239,20 +239,20 @@ contract token {
         uint8 decimalUnits,
         string tokenSymbol
         ) {
-        balanceOf[msg.sender] = initialSupply;              // Give the creator all initial tokens
-        totalSupply = initialSupply;                        // Update total supply
-        name = tokenName;                                   // Set the name for display purposes
-        symbol = tokenSymbol;                               // Set the symbol for display purposes
-        decimals = decimalUnits;                            // Amount of decimals for display purposes
+        balanceOf[msg.sender] = initialSupply;              /* Give the creator all initial tokens */
+        totalSupply = initialSupply;                        /* Update total supply */
+        name = tokenName;                                   /* Set the name for display purposes */
+        symbol = tokenSymbol;                               /* Set the symbol for display purposes */
+        decimals = decimalUnits;                            /* Amount of decimals for display purposes */
     }
 
     /* Send coins */
     function transfer(address _to, uint256 _value) {
-        if (balanceOf[msg.sender] < _value) throw;           // Check if the sender has enough
-        if (balanceOf[_to] + _value < balanceOf[_to]) throw; // Check for overflows
-        balanceOf[msg.sender] -= _value;                     // Subtract from the sender
-        balanceOf[_to] += _value;                            // Add the same to the recipient
-        Transfer(msg.sender, _to, _value);                   // Notify anyone listening that this transfer took place
+        if (balanceOf[msg.sender] < _value) throw;           /* Check if the sender has enough */
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; /* Check for overflows */
+        balanceOf[msg.sender] -= _value;                     /* Subtract from the sender */
+        balanceOf[_to] += _value;                            /* Add the same to the recipient */
+        Transfer(msg.sender, _to, _value);                   /* Notify anyone listening that this transfer took place */
     }
 
     /* Allow another contract to spend some tokens in your behalf */
@@ -266,11 +266,11 @@ contract token {
 
     /* A contract attempts to get the coins */
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
-        if (balanceOf[_from] < _value) throw;                 // Check if the sender has enough
-        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  // Check for overflows
-        if (_value > allowance[_from][msg.sender]) throw;     // Check allowance
-        balanceOf[_from] -= _value;                           // Subtract from the sender
-        balanceOf[_to] += _value;                             // Add the same to the recipient
+        if (balanceOf[_from] < _value) throw;                 /* Check if the sender has enough */
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  /* Check for overflows */
+        if (_value > allowance[_from][msg.sender]) throw;     /* Check allowance */
+        balanceOf[_from] -= _value;                           /* Subtract from the sender */
+        balanceOf[_to] += _value;                             /* Add the same to the recipient */
         allowance[_from][msg.sender] -= _value;
         Transfer(_from, _to, _value);
         return true;
@@ -278,7 +278,7 @@ contract token {
 
     /* This unnamed function is called whenever someone tries to send ether to it */
     function () {
-        throw;     // Prevents accidental sending of ether
+        throw;     /* Prevents accidental sending of ether */
     }
 }
 
@@ -301,33 +301,33 @@ contract Scamions is owned, token {
         string tokenSymbol,
         address centralMinter
     ) {
-        if(centralMinter != 0 ) owner = msg.sender;         // Sets the minter
-        balanceOf[msg.sender] = initialSupply;              // Give the creator all initial tokens
-        name = tokenName;                                   // Set the name for display purposes
-        symbol = tokenSymbol;                               // Set the symbol for display purposes
-        decimals = decimalUnits;                            // Amount of decimals for display purposes
+        if(centralMinter != 0 ) owner = msg.sender;         /* Sets the minter */
+        balanceOf[msg.sender] = initialSupply;              /* Give the creator all initial tokens */
+        name = tokenName;                                   /* Set the name for display purposes */
+        symbol = tokenSymbol;                               /* Set the symbol for display purposes */
+        decimals = decimalUnits;                            /* Amount of decimals for display purposes */
         totalSupply = initialSupply;
     }
 
     /* Send coins */
     function transfer(address _to, uint256 _value) {
-        if (balanceOf[msg.sender] < _value) throw;           // Check if the sender has enough
-        if (balanceOf[_to] + _value < balanceOf[_to]) throw; // Check for overflows
-        if (frozenAccount[msg.sender]) throw;                // Check if frozen
-        balanceOf[msg.sender] -= _value;                     // Subtract from the sender
-        balanceOf[_to] += _value;                            // Add the same to the recipient
-        Transfer(msg.sender, _to, _value);                   // Notify anyone listening that this transfer took place
+        if (balanceOf[msg.sender] < _value) throw;           /* Check if the sender has enough */
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; /* Check for overflows */
+        if (frozenAccount[msg.sender]) throw;                /* Check if frozen */
+        balanceOf[msg.sender] -= _value;                     /* Subtract from the sender */
+        balanceOf[_to] += _value;                            /* Add the same to the recipient */
+        Transfer(msg.sender, _to, _value);                   /* Notify anyone listening that this transfer took place */
     }
 
 
     /* A contract attempts to get the coins */
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
-        if (frozenAccount[_from]) throw;                        // Check if frozen            
-        if (balanceOf[_from] < _value) throw;                 // Check if the sender has enough
-        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  // Check for overflows
-        if (_value > allowance[_from][msg.sender]) throw;   // Check allowance
-        balanceOf[_from] -= _value;                          // Subtract from the sender
-        balanceOf[_to] += _value;                            // Add the same to the recipient
+        if (frozenAccount[_from]) throw;                        /* Check if frozen */         
+        if (balanceOf[_from] < _value) throw;                 /* Check if the sender has enough */
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  /* Check for overflows */
+        if (_value > allowance[_from][msg.sender]) throw;   /* Check allowance */
+        balanceOf[_from] -= _value;                          /* Subtract from the sender */
+        balanceOf[_to] += _value;                            /* Add the same to the recipient */
         allowance[_from][msg.sender] -= _value;
         Transfer(_from, _to, _value);
         return true;
@@ -351,19 +351,19 @@ contract Scamions is owned, token {
     }
 
     function buy() {
-        uint amount = msg.value / buyPrice;                // calculates the amount
-        if (balanceOf[this] < amount) throw;               // checks if it has enough to sell
-        balanceOf[msg.sender] += amount;                   // adds the amount to buyer's balance
-        balanceOf[this] -= amount;                         // subtracts amount from seller's balance
-        Transfer(this, msg.sender, amount);                // execute an event reflecting the change
+        uint amount = msg.value / buyPrice;                /* calculates the amount */
+        if (balanceOf[this] < amount) throw;               /* checks if it has enough to sell */
+        balanceOf[msg.sender] += amount;                   /* adds the amount to buyer's balance */
+        balanceOf[this] -= amount;                         /* subtracts amount from seller's balance */
+        Transfer(this, msg.sender, amount);                /* execute an event reflecting the change */
     }
 
     function sell(uint256 amount) {
-        if (balanceOf[msg.sender] < amount ) throw;        // checks if the sender has enough to sell
-        balanceOf[this] += amount;                         // adds the amount to owner's balance
-        balanceOf[msg.sender] -= amount;                   // subtracts the amount from seller's balance
-        msg.sender.send(amount * sellPrice);               // sends ether to the seller
-        Transfer(msg.sender, this, amount);                // executes an event reflecting on the change
+        if (balanceOf[msg.sender] < amount ) throw;        /* checks if the sender has enough to sell */
+        balanceOf[this] += amount;                         /* adds the amount to owner's balance */
+        balanceOf[msg.sender] -= amount;                   /* subtracts the amount from seller's balance */
+        msg.sender.send(amount * sellPrice);               /* sends ether to the seller */
+        Transfer(msg.sender, this, amount);                /* executes an event reflecting on the change */
     }
 }
 
