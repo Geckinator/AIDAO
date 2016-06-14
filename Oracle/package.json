@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "buffered-reader": "^1.0.1",
     "commander": "^2.9.0",
+    "natural": "^0.4.0",
     "python-shell": "^0.4.0",
     "web3": "^0.17.0-alpha"
   },
