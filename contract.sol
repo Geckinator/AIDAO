@@ -24,7 +24,7 @@ contract Word {
 	}
 	
 	/* Function to be called when letters are sold from oracle to the word company */
-	function buyLetter(byte _letterSymbols, uint8 _amounts) {
+	function buyLetter(bytes _letterSymbols, uint8[] _amounts) {
 	    for (uint8 l = 0; l < _letterSymbols.length; l++) {
     	    Letter _letter = Letter(letterContracts[_letterSymbols[l]]);
     	    Scamions(scamionContractAddress).transfer(msg.sender, _letter.getDemand() * _amounts[l]);
@@ -36,7 +36,7 @@ contract Word {
 	/* tickTime is run at each time step, places new order and checks if previous
 	orders have been fulfilled before incrementing time. Inputs are a list of unique
 	letters in the current word, along with their number of instances in the same order */
-	function tickTime(bytes _uniqueLetters, uint8[] _amounts) {
+	function tickTime(bytes _uniqueLetters, uint8[] _amounts) returns(uint clock) {
 	    
 	    /* Store the current order. */
 	    orderTimestamps.push(clock);
@@ -47,7 +47,7 @@ contract Word {
 	    for (uint8 h = 0; h < _uniqueLetters.length; h++) {
 	        Letter(letterContracts[byte(h + 65)]).incrementDemand(_amounts[h]);
 	    }
-	    
+
 	    /* Now see if any of the stored orders can be shipped. */
 	    uint[] memory tempOrderTimestamps = new uint[](orderTimestamps.length);     /* Maintain the orders that still aren't met. */
 	    uint8 k = 0;
@@ -61,8 +61,8 @@ contract Word {
 	            }
 	        }
 	        if (_readyToShip) {
-	            for (uint8 l = 0; l < _uniqueLetters[t]; l++) {
-	                lettersInStock[_uniqueLetters[t]] -= _amounts[t];               /* Ship word if it passed the test. */
+	            for (uint8 l = 0; l < order_.uniqueLetters.length; l++) {
+	                lettersInStock[order_.uniqueLetters[l]] -= order_.amounts[l];   /* Ship word if it passed the test. */
 	            }
 	            delete orders[orderTimestamps[i]];                                  /* Delete its corresponding order. */
 	        }
@@ -71,12 +71,12 @@ contract Word {
 	            k++;
 	        }
 	    }
-	    for (uint8 m = k; m < orderTiestamps.length; m++){
+	    for (uint8 m = k; m < orderTimestamps.length; m++){
 	        delete tempOrderTimestamps[m];
 	    }
 	    orderTimestamps = tempOrderTimestamps;
 	    
-	    clock++;
+	    return ++clock;
 }
 
 }
@@ -202,7 +202,7 @@ contract token {
     }
 }
 
-contract MyAdvancedToken is owned, token {
+contract Scamions is owned, token {
 
     uint256 public sellPrice;
     uint256 public buyPrice;
@@ -214,7 +214,7 @@ contract MyAdvancedToken is owned, token {
     event FrozenFunds(address target, bool frozen);
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
-    function MyAdvancedToken(
+    function Scamions(
         uint256 initialSupply,
         string tokenName,
         uint8 decimalUnits,
