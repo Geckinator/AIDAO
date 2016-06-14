@@ -89,7 +89,6 @@ contract Letter {
     
     function Letter(
         byte _symbol,
-        address _scamionContractAddress,
         uint _productionTime
         ) {
         demand = 0;
