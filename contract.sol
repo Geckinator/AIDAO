@@ -1,7 +1,7 @@
 contract Word {
 
     uint public clock;                                      /* Keeps track of current time. */
-    address scamionContractAddress;                         /* Address of the scamion contract. */
+    address public scamionContractAddress;                         /* Address of the scamion contract. */
     
     struct Order {
         bytes uniqueLetters;
@@ -27,7 +27,7 @@ contract Word {
 	function buyLetter(bytes _letterSymbols, uint8[] _amounts) {
 	    for (uint8 l = 0; l < _letterSymbols.length; l++) {
     	    Letter _letter = Letter(letterContracts[_letterSymbols[l]]);
-    	    Scamions(scamionContractAddress).transfer(msg.sender, _letter.getDemand() * _amounts[l]);
+    	    Scamions(scamionContractAddress).transfer(msg.sender, _letter.demand() * _amounts[l]);
     	    _letter.incrementDemand(-_amounts[l]);
     	    lettersInStock[_letterSymbols[l]] += _amounts[l];
 	    }
@@ -94,18 +94,6 @@ contract Letter {
         demand = 0;
         symbol = _symbol;
         productionTime = _productionTime;
-    }
-    
-    function getDemand() returns(uint a) {
-        return demand;
-    }
-    
-    function getSymbol() returns(byte s) {
-        return symbol;
-    }
-    
-    function getProductionTime() returns(uint t){
-        return productionTime;
     }
    
     function setProductionTime(uint _productionTime) {

@@ -14,21 +14,21 @@ var web3 = new Web3();
 // var DataReader = reader.DataReader;
 var natural = require('natural'),
 tokenizer = new natural.WordTokenizer();
-localhost ="http://127.0.0.1:8545";
-external= '' // PASTE EXTERNAL RPC PROVIDER HERE, e.g. Morden
+localhost = "http://127.0.0.1:8545";
+external= ''; // PASTE EXTERNAL RPC PROVIDER HERE, e.g. Morden
 
 
 provider = localhost; // the provider is going to be set as the local host( our private chain) for the purposes of this small test
 
 web3.setProvider(new web3.providers.HttpProvider(provider));
 var coinbase = web3.eth.coinbase; //get the coinbase address
-console.log(coinbase);
+console.log("Coinbase: ", coinbase);
 
 var balance = web3.eth.getBalance(coinbase);
-console.log(balance.toString(10));
+console.log("Coinbase balance: ", balance.toString(10));
 
 var accounts = web3.eth.accounts;
-console.log(accounts); // return all the accounts managed by the node
+console.log("List of user accounts: ", accounts); // return all the accounts managed by the node
 
 /* Get the ABIs of the contracts */
 abiScamion = [{"constant":false,"inputs":[{"name":"newSellPrice","type":"uint256"},{"name":"newBuyPrice","type":"uint256"}],"name":"setPrices","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[],"name":"sellPrice","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"standard","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"mintedAmount","type":"uint256"}],"name":"mintToken","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"buyPrice","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[],"name":"buy","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"frozenAccount","outputs":[{"name":"","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"sell","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"freeze","type":"bool"}],"name":"freezeAccount","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"type":"function"},{"inputs":[{"name":"initialSupply","type":"uint256"},{"name":"tokenName","type":"string"},{"name":"decimalUnits","type":"uint8"},{"name":"tokenSymbol","type":"string"},{"name":"centralMinter","type":"address"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"target","type":"address"},{"indexed":false,"name":"frozen","type":"bool"}],"name":"FrozenFunds","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}];
@@ -47,6 +47,10 @@ for (var i = 0; i < alphabet.length; i++) {
   letters.push(LetterContract.at(letterAddresses[i]));
 }
 var word = WordContract.at("0xe79ee4e5951ac6c2ce4161ce66416012af93bc56");
+
+var own = scam.owner();
+console.log(own);
+console.log("Scam owner: ", own);
 
 /* Create matrix to store demand data points */
 var demand = new Array(letterAddresses.length);
@@ -83,13 +87,13 @@ lineReader.on('line', function (line) {
       }
     }
 
-    //console.log(letters[0].getDemand());
+    console.log(letters[0].getDemand());
 
     /* Now tick the time */
-    //clock = word.tickTime(uniqueLetters, amounts);
+    clock = word.tickTime(uniqueLetters, amounts);
 
     for (var l = 0; l < letterAddresses.length; l++) {
-      //demand[l].push(letters[l].getDemand());
+      demand[l].push(letters[l].getDemand());
     }
 
     var options = {
