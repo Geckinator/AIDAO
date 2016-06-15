@@ -48,16 +48,11 @@ for (var i = 0; i < alphabet.length; i++) {
 }
 var word = WordContract.at("0xe79ee4e5951ac6c2ce4161ce66416012af93bc56");
 
-var own = scam.owner();
-console.log(own);
-console.log("Scam owner: ", own);
-
 /* Create matrix to store demand data points */
 var demand = new Array(letterAddresses.length);
 for (var i = 0; i < letterAddresses.length; i++) {
   demand[i] = new Array();
 }
-
 
 /* Read from file */
 var file = "mobydick.txt";
@@ -73,25 +68,31 @@ lineReader.on('line', function (line) {
   //TODO: based on what python-shell returned call the contracts and set some variables there.
   var words = tokenizer.tokenize(line);
   for (var w = 0; w < words.length; w++) {                        /* Loop through all words in current line */
-    word = words[w];
-    console.log(word);
+    var currentWord = words[w].toLowerCase();
     var uniqueLetters = [];
     var amounts = [];
-    for (var y = 0; y < word.length; y++) {                       /* Loop through all letters in current word to count occurrences */
-      var index = uniqueLetters.indexOf(word[y]);                 /* Find index of letter in list of unique letters */
+    for (var y = 0; y < currentWord.length; y++) {                       /* Loop through all letters in current word to count occurrences */
+      var index = uniqueLetters.indexOf(currentWord[y]);                 /* Find index of letter in list of unique letters */
       if (index == -1) {                                          /* If it's not there */
-        uniqueLetters.push(word[y]);                              /* Then add it to the list */
+        uniqueLetters.push(currentWord[y]);                              /* Then add it to the list */
         amounts.push(1);                                          /* And set counter to one */
       } else {
         amounts[index]++;                                         /* Otherwise it has already been found and the counter can be incremented */
       }
     }
 
-    console.log(letters[0].getDemand());
-
+    console.log(uniqueLetters);
+    console.log(amounts);
+    //word.buyLetter(uniqueLetters, amounts);
+    console.log("Word's clock: ", String(word.clock()));
+    console.log(String(scam.balanceOf[0xa47ab0de78a67c28cc167c1e3068c456aca29915]))
+    scam.mintToken("0xe79ee4e5951ac6c2ce4161ce66416012af93bc56", 5);
+    console.log("l")
+    console.log(String(scam.balanceOf["0xe79ee4e5951ac6c2ce4161ce66416012af93bc56"]));
     /* Now tick the time */
     clock = word.tickTime(uniqueLetters, amounts);
 
+    console.log("H");
     for (var l = 0; l < letterAddresses.length; l++) {
       demand[l].push(letters[l].getDemand());
     }
