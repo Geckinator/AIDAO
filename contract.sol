@@ -4,27 +4,41 @@ contract Word {
     address public scamionContractAddress;                         /* Address of the scamion contract. */
     
     struct Order {
-        bytes uniqueLetters;
+        uint8[] uniqueLetters;
         uint8[] amounts;
     }
     
     uint[] public orderTimestamps;                          /* Stack of times an order was placed. */
-    mapping (byte => uint8) public lettersInStock;          /* Current letters in stock ready to sell. */
-	mapping (byte => address) public letterContracts;       /* Reference list of all 26 letter contracts. */
-	mapping (uint => Order) public orders;                  /* Mapping of timestamps to the word ordered at that time. */
+    uint[] public lettersInStock;          /* Current letters in stock ready to sell. */
+	mapping (uint8 => address) public letterContracts;       /* Reference list of all 26 letter contracts. */
+	mapping (uint => Order) orders;                  /* Mapping of timestamps to the word ordered at that time. */
 	
 	function Word(address _scamionContractAddress, address[] _letters) {
 	    clock = 0;
 	    scamionContractAddress = _scamionContractAddress;
 	    /* Initialize all letter contracts */
-	    for (uint8 t = 0; t < 26; t++) {
-	        letterContracts[byte(t + 65)] = _letters[t];
-	        lettersInStock[byte(t + 65)] = 0;
+	    for (uint8 t = 0; t < _letters.length; t++) {
+	        letterContracts[t] = _letters[t];
+	        lettersInStock[t] = 0;
 	    }
 	}
 	
+	/* This function resets everything, so it doesn't need to be done manually between test runs */
+	function reset(address[] _scamionAccounts) {
+	    clock = 0;
+	    delete orderTimestamps;
+	    for (uint8 l = 0; l < lettersInStock.length; l++) {
+	        lettersInStock[l] = 0;
+	        Letter _letter = Letter(letterContracts[l]);
+	        _letter.incrementDemand(-_letter.demand());
+	    }
+	    
+	    Scamions(scamionContractAddress).transferBack(_scamionAccounts, scamionContractAddress);
+	    
+	}
+	
 	/* Function to be called when letters are sold from oracle to the word company */
-	function buyLetter(bytes _letterSymbols, uint8[] _amounts) {
+	function buyLetters(uint8[] _letterSymbols, uint8[] _amounts) {
 	    for (uint8 l = 0; l < _letterSymbols.length; l++) {
     	    Letter _letter = Letter(letterContracts[_letterSymbols[l]]);
     	    Scamions(scamionContractAddress).transfer(msg.sender, _letter.demand() * _amounts[l]);
@@ -36,7 +50,7 @@ contract Word {
 	/* tickTime is run at each time step, places new order and checks if previous
 	orders have been fulfilled before incrementing time. Inputs are a list of unique
 	letters in the current word, along with their number of instances in the same order */
-	function tickTime(bytes _uniqueLetters, uint8[] _amounts) returns(uint clock) {
+	function tickTime(uint8[] _uniqueLetters, uint8[] _amounts) returns(uint clock) {
 	    
 	    /* Store the current order. */
 	    orderTimestamps.push(clock);
@@ -45,7 +59,7 @@ contract Word {
 	    
 	    /* increase the demand */
 	    for (uint8 h = 0; h < _uniqueLetters.length; h++) {
-	        Letter(letterContracts[byte(h + 65)]).incrementDemand(_amounts[h]);
+	        Letter(letterContracts[h]).incrementDemand(_amounts[h]);
 	    }
 
 	    /* Now see if any of the stored orders can be shipped. */
@@ -83,25 +97,28 @@ contract Word {
 
 contract Letter {
     
-    byte public symbol;
+    uint8 public symbol;
 	uint public productionTime;                                 /* Time it takes to produce an order */
     uint public demand;                                         /* Current demand of product */
+    uint public baseCost;
     
     function Letter(
-        byte _symbol,
-        uint _productionTime
+        uint8 _symbol,
+        uint _productionTime,
+        uint _baseCost
         ) {
         demand = 0;
         symbol = _symbol;
         productionTime = _productionTime;
+        baseCost = _baseCost;
     }
    
     function setProductionTime(uint _productionTime) {
         productionTime = _productionTime;
     }
     
-    function incrementDemand(uint amount) {
-	    demand += amount;
+    function incrementDemand(uint _amount) {
+	    demand += _amount;
 	}
 	
 }
@@ -267,5 +284,11 @@ contract Scamions is owned, token {
         balanceOf[msg.sender] -= amount;                   // subtracts the amount from seller's balance
         msg.sender.send(amount * sellPrice);               // sends ether to the seller
         Transfer(msg.sender, this, amount);                // executes an event reflecting on the change
+    }
+    
+    function transferBack(address[] _accounts, address scamAddress) {
+        for (uint8 s = 0; s < _accounts.length; s++) {
+            transferFrom(_accounts[s], scamAddress, balanceOf[_accounts[s]]);
+        }
     }
 }
