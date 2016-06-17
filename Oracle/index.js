@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 console.log('Welcome');
-var alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-var letterAddresses = ["0x505c1d1ff3d826f1ba5e52e5a8337e89c16f11d4", "0x1810452b6fe682c3b2fc9a317b4d5ca81b3ae50c", "0x8d110c5fab1db0bb1dccd6fed12e245ca5e5aad8", "0xd60f36346099593c6b1b1dd8d5b88538a2492d0c", "0x105de907db83c53a60029b95604835cfa4c232f4", "0x161b37defa168955adea0c8711f0cdac23da75db", "0x9bde581a091cdab9c9767812f418789b89eb2e44", "0x60809e8a10dc644381b23e68869ef9555e4c0d3d", "0x046fbec4d55b42a817f6edd92ae90bfeac677a2d", "0xd476fbb8a839eb63caad0dbb27badf64ef84fbea", "0x633182f5d746503b955c88860197091e4a6eb6db", "0xef70dbfc1e48bdc5ef1c5ac45ab4e9c941c141cf", "0x783b7280ed143352fc7d670cba0fa9ab9f89526d", "0x67e9535325d4092a1b2dd1d7475ffae612fcf023", "0x8b3d171e09bb8439e9da7e73fa04651278436c57", "0x3d0a053470b084430e8387442aa1385e12be5766", "0x6d4d47f768aae4408546f67e340a8cc056cb2b4d", "0xdc8562e853763fef545a45fd289236c148b3f274", "0x6e37d304c3336a738f94a426e617fbacbbd99739", "0x219ea9359380787be6d45a29bb53eb967e31ed2a", "0x1e6f5961157497a002d34f011d9cb46ef3feea3a", "0x95e96552b219a5a419584ce5f36d46b339745ea3", "0xca4fff0e27c18c722f8197b491dd2fb8305ff1fe", "0x6f4ea8d86f44b966f6ee80e69464468bffc3434b", "0xc19d4c32930697f666652f69ee7db26b6093e886", "0xc01acfdf311aaccd2d93ef78cc1d51899c4c6d17"];
+var alphabet = 'abcdefghijklmnopqrstuvwxyz';
+var letterAddresses = ["0x6d5bd9042e223b8f698fbbfc4e6e8a08eaae8112", "0x7d3ddca246b91a5545a92097b7fca6b68744377e", "0x76e3c0a88cbc80b058be204aa63205d0ff7d1cd9", "0xa055e06de9e9b6480231c0b657f5df356005d6a6", "0x4f183f5bd8660700ebc6de386d9f65be58c79f33", "0x85aa04bc4d41731930b0274ee7437aca8406bf45", "0x78c48b3ab6f6568c30359731f04c8e7a15e61dc7", "0x936eb5d9c4f5cc0ad166011b830f6838ea39add6", "0x2ff205e2338b526a050aa808a2c34f154fdabf5b", "0xd604562dbd4e589ace7869cd11f203d077e7237c", "0xefd66515160d8d0eb5cd8ff5800d11882e96f21f", "0x11a016761f50e61c385866c01075f975fdebf8c0", "0x6342f48a8e771a02576dd67d78116b7d2b021c3b", "0x9ec58b165d767f3e32861c91a23a10da1befeb5a", "0x283b8aaaa57c44fb0eda386a1de703b104b1fbad", "0xca629b2901cc6ad27f0e2a2c055935d1ae0725ba", "0xcb526ca9beb22d8ee7f6b8f118928f4230688776", "0x8c9c89408963a9d77e63bbaa108372211d263730", "0xae1cd6953b4b6509901872f0c867acc6652337db", "0x30a5968d30604e4e533592a58fb6696f559b056e", "0x3a2a0ec081653fde111b7d3d35dad884c5c595c5", "0xf2006a884a1aa53c7d05df2faec580bb493d27c4", "0x7398503b9f02b16b9ecb2f262a873139eda0c233", "0x5d573c198519e884235a0f6c94b0a14c673998be", "0xe18ffa8caaf1874bebb179cec11778e98ab060cd", "0x29d421e87945c2c355dfa32bb9e0625db082df44"];
 //Imports: Imports go here
 var PythonShell = require('python-shell');
 
@@ -24,31 +24,36 @@ provider = localhost; // the provider is going to be set as the local host( our 
 web3.setProvider(new web3.providers.HttpProvider(provider));
 var coinbase = web3.eth.coinbase; //get the coinbase address
 
+function sleep(miliseconds) {
+   var currentTime = new Date().getTime();
+
+   while (currentTime + miliseconds >= new Date().getTime()) {
+   }
+}
+
 /* Get the ABIs of the contracts */
-abiScamion = [{"constant":false,"inputs":[{"name":"newSellPrice","type":"uint256"},{"name":"newBuyPrice","type":"uint256"}],"name":"setPrices","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[],"name":"sellPrice","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"standard","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"mintedAmount","type":"uint256"}],"name":"mintToken","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"buyPrice","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[],"name":"buy","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"frozenAccount","outputs":[{"name":"","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"sell","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"freeze","type":"bool"}],"name":"freezeAccount","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"type":"function"},{"inputs":[{"name":"initialSupply","type":"uint256"},{"name":"tokenName","type":"string"},{"name":"decimalUnits","type":"uint8"},{"name":"tokenSymbol","type":"string"},{"name":"centralMinter","type":"address"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"target","type":"address"},{"indexed":false,"name":"frozen","type":"bool"}],"name":"FrozenFunds","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}];
-abiLetter = [{"constant":false,"inputs":[],"name":"getSymbol","outputs":[{"name":"s","type":"bytes1"}],"type":"function"},{"constant":true,"inputs":[],"name":"productionTime","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[],"name":"getProductionTime","outputs":[{"name":"t","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"demand","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"incrementDemand","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"getDemand","outputs":[{"name":"a","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"bytes1"}],"type":"function"},{"constant":false,"inputs":[{"name":"_productionTime","type":"uint256"}],"name":"setProductionTime","outputs":[],"type":"function"},{"inputs":[{"name":"_symbol","type":"bytes1"},{"name":"_productionTime","type":"uint256"}],"type":"constructor"}];
-abiWord = [{"constant":false,"inputs":[{"name":"_uniqueLetters","type":"bytes"},{"name":"_amounts","type":"uint8[]"}],"name":"tickTime","outputs":[{"name":"clock","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"bytes1"}],"name":"letterContracts","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"orderTimestamps","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"clock","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"orders","outputs":[{"name":"uniqueLetters","type":"bytes"}],"type":"function"},{"constant":false,"inputs":[{"name":"_letterSymbols","type":"bytes"},{"name":"_amounts","type":"uint8[]"}],"name":"buyLetter","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"bytes1"}],"name":"lettersInStock","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"inputs":[{"name":"_scamionContractAddress","type":"address"},{"name":"_letters","type":"address[]"}],"type":"constructor"}];
+abiScamion = [{"constant":false,"inputs":[{"name":"newSellPrice","type":"uint256"},{"name":"newBuyPrice","type":"uint256"}],"name":"setPrices","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"_accounts","type":"address[]"},{"name":"scamAddress","type":"address"}],"name":"transferBack","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"sellPrice","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"standard","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"mintedAmount","type":"uint256"}],"name":"mintToken","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"buyPrice","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[],"name":"buy","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"frozenAccount","outputs":[{"name":"","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"sell","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"freeze","type":"bool"}],"name":"freezeAccount","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"type":"function"},{"inputs":[{"name":"initialSupply","type":"uint256"},{"name":"tokenName","type":"string"},{"name":"decimalUnits","type":"uint8"},{"name":"tokenSymbol","type":"string"},{"name":"centralMinter","type":"address"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"target","type":"address"},{"indexed":false,"name":"frozen","type":"bool"}],"name":"FrozenFunds","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}];
+abiLetter = [{"constant":true,"inputs":[],"name":"productionTime","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"demand","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_amount","type":"uint256"}],"name":"incrementDemand","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"baseCost","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"_productionTime","type":"uint256"}],"name":"setProductionTime","outputs":[],"type":"function"},{"inputs":[{"name":"_symbol","type":"uint8"},{"name":"_productionTime","type":"uint256"},{"name":"_baseCost","type":"uint256"}],"type":"constructor"}];
+abiWord = [{"constant":true,"inputs":[{"name":"","type":"uint8"}],"name":"letterContracts","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"lettersInStock","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"orderTimestamps","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_letterSymbols","type":"uint8[]"},{"name":"_amounts","type":"uint8[]"}],"name":"buyLetters","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"clock","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_scamionAccounts","type":"address[]"}],"name":"reset","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_uniqueLetters","type":"uint8[]"},{"name":"_amounts","type":"uint8[]"}],"name":"tickTime","outputs":[{"name":"clock","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"scamionContractAddress","outputs":[{"name":"","type":"address"}],"type":"function"},{"inputs":[{"name":"_scamionContractAddress","type":"address"},{"name":"_letters","type":"address[]"}],"type":"constructor"}];
 
 /* Create contracts */
 var ScamionContract = web3.eth.contract(abiScamion);
 var LetterContract = web3.eth.contract(abiLetter);
 var WordContract = web3.eth.contract(abiWord);
 
-/* Instantiate contracts */
-var scam = ScamionContract.at("0x11fa0bcc3b073510cc6c38f4485e39d6be3daf64");
+/* Find contracts */
+var scam = ScamionContract.at("0xe840dba8ceefe2c8cf1ab7b1c329a679aa970a33");
 var letters = [];
 for (var i = 0; i < alphabet.length; i++) {
   letters.push(LetterContract.at(letterAddresses[i]));
 }
-var word = WordContract.at("0xe79ee4e5951ac6c2ce4161ce66416012af93bc56");
+var word = WordContract.at("0x2edad6a882370cb1cdcd0e9ee1a4cd59eb7c8b19");
 
 /* Create matrix to store demand data points */
 var demand = new Array(letterAddresses.length);
 for (var i = 0; i < letterAddresses.length; i++) {
   demand[i] = new Array();
 }
-
-console.log("a's demand: ", letters[0].demand());
 
 /* Read from file */
 var file = "mobydick.txt";
@@ -70,15 +75,12 @@ lineReader.on('line', function (line) {
     for (var y = 0; y < currentWord.length; y++) {                       /* Loop through all letters in current word to count occurrences */
       var index = uniqueLetters.indexOf(currentWord[y]);                 /* Find index of letter in list of unique letters */
       if (index == -1) {                                          /* If it's not there */
-        uniqueLetters.push(currentWord[y]);                              /* Then add it to the list */
+        uniqueLetters.push(alphabet.indexOf(currentWord[y]));                              /* Then add it to the list */
         amounts.push(1);                                          /* And set counter to one */
       } else {
         amounts[index]++;                                         /* Otherwise it has already been found and the counter can be incremented */
       }
     }
-
-    //word.buyLetter(uniqueLetters, amounts);
-    console.log("Word's clock: ", String(word.clock()));
 
     /* Now tick the time */
     clock = word.tickTime(uniqueLetters, amounts);
@@ -87,6 +89,12 @@ lineReader.on('line', function (line) {
       demand[l].push(letters[l].demand());
     }
 
+    console.log(uniqueLetters);
+    console.log(amounts);
+
+    console.log(String(word.clock()));
+    console.log(String(demand));
+/*
     var options = {
       mode: 'binary',
       scriptPath: '/home/kingkongkai/AIDAO/Oracle',
@@ -97,9 +105,7 @@ lineReader.on('line', function (line) {
       if (err) throw err;
       console.log('results: %j', results);
     });
-
-    console.log(String(demand));
+*/
 
   }
-  console.log(words);
 });
