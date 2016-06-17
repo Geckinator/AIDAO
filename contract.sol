@@ -19,7 +19,7 @@ contract Word {
 	    /* Initialize all letter contracts */
 	    for (uint8 t = 0; t < _letters.length; t++) {
 	        letterContracts[t] = _letters[t];
-	        lettersInStock[t] = 0;
+	        lettersInStock.push(0);
 	    }
 	}
 	
@@ -41,7 +41,7 @@ contract Word {
 	function buyLetters(uint8[] _letterSymbols, uint8[] _amounts) {
 	    for (uint8 l = 0; l < _letterSymbols.length; l++) {
     	    Letter _letter = Letter(letterContracts[_letterSymbols[l]]);
-    	    Scamions(scamionContractAddress).transfer(msg.sender, _letter.demand() * _amounts[l]);
+    	    Scamions(scamionContractAddress).transfer(msg.sender, (_letter.demand() + _letter.baseCost()) * _amounts[l]);
     	    _letter.incrementDemand(-_amounts[l]);
     	    lettersInStock[_letterSymbols[l]] += _amounts[l];
 	    }
