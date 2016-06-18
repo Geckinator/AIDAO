@@ -10,7 +10,7 @@ from string import ascii_lowercase
 
 tokenizer =RegexpTokenizer(r'\w+')
 letters = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","x","y","z"]
-cumulative = False
+cumulative = True
 vanilla_data={}
 data = {}
 for c in ascii_lowercase:
@@ -27,8 +27,7 @@ with open('mobydick.txt', 'r') as f:
                 data = {}
                 for c in ascii_lowercase:
                     data[c] = 0
-            # else:
-            #     data = dict.copy(data)
+
             for letter in word:
                 if letter in letters:
                     if letter in data:
@@ -37,7 +36,7 @@ with open('mobydick.txt', 'r') as f:
                         data[letter] = 1
 
 
-            timeseries.append(data)
+            timeseries.append(dict(data))
 
 print('Book parsed')
 
@@ -52,7 +51,7 @@ else:
     index_limit = len(timeseries_train)
 for i in range(index_limit):
     train_a.addSample(i, timeseries_train[i]['a'])
-    test_a.addSample(i, timeseries_test[i]['a'])
+    test_a.addSample(i+len(timeseries_train), timeseries_test[i]['a'])
 
 print("Train and Test data created")
 n = RecurrentNetwork()
