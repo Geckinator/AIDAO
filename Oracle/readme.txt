@@ -5,4 +5,4 @@ node index.js // just runs the script
 
 Check the package.json for dependencies
 
-to install new dependencies use npm install <package> -save
+to install **new** dependencies use npm install <package> -save ( any dependency that makes it into the node script should be installed)
