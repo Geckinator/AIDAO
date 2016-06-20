@@ -1,20 +1,11 @@
-
-
 contract Word {
 
   uint8 public ticker;                                      /* Keeps track of current time. */
   address public scamionContractAddress;                         /* Address of the scamion contract. */
 
-  // struct Order
-  // {
-  //   mapping (uint8 => uint8) letterAmounts;
-  //   uint8[] numofDiffLetters;
+  mapping(uint8 => mapping (uint8 => uint8)) public orders; /* orderid = > lettersymbol => amount*/
+  mapping(uint8 => uint8[]) public diffLetters ; /* orderid => letters[] */
 
-  // }
-  mapping(uint8 => mapping (uint8 => uint8)) orders;
-  mapping(uint8 => uint8[]) diffLetters ; /* orderid => letters[] */
-  // mapping(uint8 => uint8) numDiffLetters /* */
-  // mapping(uint8 => Order)  orders ;
 
   event AdvancedTime(string out);
   event OrderPlaced(string out);
@@ -35,14 +26,11 @@ function Word(address _scamionContractAddress, address[] _letters)
 
 function placeOrder(uint8[] _letters, uint8[] _amounts )
 {
-    mapping (uint8 => uint8) temp;
     for (uint8 t = 0; t < _letters.length ; t++)
     {
-        // temp[_letters[t]] = _amounts[t];
         orders[ticker][_letters[t]] = _amounts[t];
         Letter(letterContracts[_letters[t]]).placeOrder(_amounts[t]);
     }
-    // orders[ticker] = temp;
     diffLetters[ticker] = _letters;
 
 
@@ -52,7 +40,7 @@ function placeOrder(uint8[] _letters, uint8[] _amounts )
 
 function sellWord(uint8 orderId)
 {
-
+    uint8 price = 2;
     //TODO: sell to whom?
     //remove orderid diffLetters, orders
 }
@@ -61,7 +49,7 @@ function sellWord(uint8 orderId)
 function buyLetters(uint8 _letterSymbol, uint8 orderID, uint8 _price, uint8 _amount )
 {
         uint8 rdytogo = 1;
-        uint8 logicalMultiplier;
+        uint8 logicalMultiplier=0;
 
         Scamions(scamionContractAddress).transfer(msg.sender, _price);
         orders[orderID][_letterSymbol] -= _amount;
@@ -103,9 +91,9 @@ contract Letter {
   uint8 public productionTime;                                 /* Time it takes to produce an order */
   uint8 public demand;                                         /* Current demand of product */
   uint8 public baseCost;
-  bool inproduction;
-  uint8 ticker;
-  address bank;
+  bool  public inproduction;
+  uint8 public ticker;
+  address public bank;
   event AdvancedTime(string out);
   event OrderPlaced(string out);
   event LetterWasBusy(string out);
@@ -115,13 +103,13 @@ contract Letter {
     uint8 timestamp;
     uint8 amount;
   }
-  order inProgress;
-  modifier isFree(bool inproduction) {
-      if (inproduction) {
+  order public inProgress;
+  /*modifier isFree(bool _inproduction) {
+      if (_inproduction) {
           LetterWasBusy("Letter was busy!");
           throw;
       }
-  }
+  }*/
 
 
   function Letter(
@@ -137,28 +125,35 @@ contract Letter {
       bank = _bank ;
       ticker =0;
   }
-  function placeOrder(uint8 _amount) isFree(inproduction)
+  function placeOrder(uint8 _amount)
   {
-       inProgress = order(msg.sender, ticker, _amount);
-       inproduction = true;
-       OrderPlaced("Letter order has been placed");
-
+      if (!inproduction)
+      {
+         inProgress = order(msg.sender, ticker, _amount);
+         inproduction = true;
+         OrderPlaced("Letter order has been placed");
+      }
   }
-
-  function advanceTime()
+  function sellifReady()
   {
-    ticker++;
     if (inProgress.timestamp + productionTime >= ticker)
     {
       sellLetter();
       inproduction = false;
     }
+
+  }
+  function advanceTime()
+  {
+    ticker++;
     AdvancedTime("Letter time has advanced");
 
   }
   function sellLetter()
   {
-    Word(inProgress.contractor).buyLetters(symbol, inProgress.timestamp, inProgress.amount*(baseCost+demand), inProgress.amount) ;
+
+    uint8 price = inProgress.amount * (baseCost+demand) ;
+    Word(inProgress.contractor).buyLetters(symbol, inProgress.timestamp, price , inProgress.amount) ;
     demand -= inProgress.amount;
 
   }
@@ -401,3 +396,4 @@ contract Spawner
 
 	}
 }
+
