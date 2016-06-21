@@ -1,0 +1,1 @@
+geth --datadir data --nodiscover --rpc --rpcaddr "localhost"  --gpomax "500000000000" --rpcport "8545" --networkid 13 --ipcpath "../../media/Data/Sxoli_2/Semester_4/DAO/private\ chain/data/geth.ipc" --maxpeers 2 console 
