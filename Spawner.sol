@@ -10,7 +10,7 @@ contract Word {
   event AdvancedTime(string out);
   event OrderPlaced(string out);
 
-  mapping (uint8 => address) public letterContracts;       /* Reference list of all 26 letter contracts. */
+  mapping (uint8 => address) public letterMonitors;       /* Reference list of all 26 letter contracts. */
 
 
 function Word(address _scamionContractAddress, address[] _letters)
@@ -20,16 +20,17 @@ function Word(address _scamionContractAddress, address[] _letters)
     /* Initialize all letter contracts */
     for (uint8 t = 0; t < _letters.length; t++)
     {
-        letterContracts[t] = _letters[t];
+        letterMonitors[t] = _letters[t];
     }
 }
 
-function placeOrder(uint8[] _letters, uint8[] _amounts )
+
+function incrementDemand(uint8[] _letters, uint8[] _amounts )
 {
     for (uint8 t = 0; t < _letters.length ; t++)
     {
         orders[ticker][_letters[t]] = _amounts[t];
-        Letter(letterContracts[_letters[t]]).placeOrder(_amounts[t]);
+        LetterMonitor(letterMonitors[_letters[t]]).incrementDemand(_amounts[t]);
     }
     diffLetters[ticker] = _letters;
 
@@ -45,15 +46,36 @@ function sellWord(uint8 orderId)
     //remove orderid diffLetters, orders
 }
 
+
+function buyLetter(int8 _price, uint8 orderID, uint8 _letterSymbol, uint8 _amount)
+{
+  uint8 finalprice;
+  if (_price > 0)
+  {
+      for (int8 x = 0; x == _price ; x ++)
+      {
+        finalprice ++;
+      }
+
+      orders[orderID][_letterSymbol] -= _amount;
+    }
+    else
+    {
+      if (_price < 0)
+      {
+        for (int8 z = 0; z == _price ; z --)
+        {
+          finalprice ++;
+        }
+        Scamions(scamionContractAddress).transferFrom(msg.sender, this, finalprice);
+      }
+    }
+}
 /* Function to be called when letters are sold from oracle to the word company */
-function buyLetters(uint8 _letterSymbol, uint8 orderID, uint8 _price, uint8 _amount )
+function isWordReady(uint8 _letterSymbol, uint8 orderID, uint8 _price, uint8 _amount )
 {
         uint8 rdytogo = 1;
         uint8 logicalMultiplier=0;
-
-        Scamions(scamionContractAddress).transfer(msg.sender, _price);
-        orders[orderID][_letterSymbol] -= _amount;
-
 
         for (uint8 t = 0; t < diffLetters[orderID].length ; t++)
         {
@@ -74,7 +96,15 @@ function buyLetters(uint8 _letterSymbol, uint8 orderID, uint8 _price, uint8 _amo
         }
 
 }
+function reset()
+{
+  delete(ticker);
+  mapping(uint8 => mapping (uint8 => uint8))  orders ;
+//   orders = new mapping(uint8 => mapping (uint8 => uint8)) ;/* orderid = > lettersymbol => amount*/
+  mapping(uint8 => uint8[])  diffLetters ; /* orderid => letters[] */
 
+
+}
 function advanceTime()
 {
     ticker++;
@@ -84,62 +114,112 @@ function advanceTime()
 
 
 }
-
-contract Letter {
-
+contract LetterMonitor{
+  uint8 ticker;
+  int8 public currentDemand;
   uint8 public symbol;
-  uint8 public productionTime;                                 /* Time it takes to produce an order */
-  uint8 public demand;                                         /* Current demand of product */
-  uint8 public baseCost;
-  bool  public inproduction;
+  uint8 public productionTime;
+  event TimeAdvanced(string out);
+  function LetterMonitor(uint8 _symbol, uint8 _productionTime)
+  {
+     symbol = _symbol;
+     productionTime = _productionTime;
+     ticker=0;
+  }
+function incrementDemand(uint8 amount)
+{
+
+    for(uint8 x=1; x <= amount ; x++)
+      currentDemand += 1;
+
+}
+function decrementDemand(uint8 amount)
+{
+    for(uint8 x=1; x <= amount ; x++)
+      currentDemand -= 1;
+
+
+}
+function reset()
+{
+    delete(currentDemand);
+    delete(ticker);
+}
+function setProductionTime(uint8 _productionTime) {
+    productionTime = _productionTime;
+}
+
+function tickTime()
+{
+  ticker++;
+  TimeAdvanced("Monitor time has advanced");
+
+}
+}
+contract LetterCompany {
+
+  address wordCompany;
   uint8 public ticker;
   address public bank;
+  mapping(uint8 => address) public letterMonitors;
+  uint public maxSlots;
   event AdvancedTime(string out);
   event OrderPlaced(string out);
   event LetterWasBusy(string out);
-  struct order
+  struct orders
   {
-    address contractor;
+    uint8 productionTime;
     uint8 timestamp;
     uint8 amount;
+    uint8 symbol;
   }
-  order public inProgress;
-  /*modifier isFree(bool _inproduction) {
-      if (_inproduction) {
-          LetterWasBusy("Letter was busy!");
-          throw;
-      }
-  }*/
+  orders[] public inProgress;
 
-
-  function Letter(
-      uint8 _symbol,
-      uint8 _productionTime,
-      uint8 _baseCost,
-      address _bank
+  function LetterCompany(
+      address[] _letterMonitors,
+      address _bank,
+      address _wordCompany
       ) {
-      demand = 0;
-      symbol = _symbol;
-      productionTime = _productionTime;
-      baseCost = _baseCost;
       bank = _bank ;
-      ticker =0;
-  }
-  function placeOrder(uint8 _amount)
-  {
-      if (!inproduction)
+      ticker = 0;
+      wordCompany = _wordCompany;
+      for (uint8 x = 0 ; x< _letterMonitors.length; x++)
       {
-         inProgress = order(msg.sender, ticker, _amount);
-         inproduction = true;
+        letterMonitors[x] = _letterMonitors[x];
+      }
+  }
+  function reset()
+  {
+      delete(ticker);
+      delete(inProgress);
+
+  }
+  function remove(uint index)  {
+        if (index >= inProgress.length) return;
+
+        for (uint i = index; i<inProgress.length-1; i++){
+            inProgress[i] = inProgress[i+1];
+        }
+        delete inProgress[inProgress.length-1];
+        inProgress.length--;
+    }
+  function startProduction( uint8 _symbol, uint8 _amount)
+  {
+      if (inProgress.length <= maxSlots)
+      {
+         inProgress.push(orders(LetterMonitor(letterMonitors[_symbol]).productionTime(), ticker, _amount, _symbol));
+
          OrderPlaced("Letter order has been placed");
       }
   }
   function sellifReady()
   {
-    if (inProgress.timestamp + productionTime >= ticker)
+
+    for(uint8 t = 0 ; t > inProgress.length ; t++ )
+    if (inProgress[t].timestamp + inProgress[t].productionTime <= ticker)
     {
-      sellLetter();
-      inproduction = false;
+      sellLetter(t);
+      remove(t);
     }
 
   }
@@ -149,21 +229,20 @@ contract Letter {
     AdvancedTime("Letter time has advanced");
 
   }
-  function sellLetter()
+  function sellLetter(uint8 x)
   {
-
-    uint8 price = inProgress.amount * (baseCost+demand) ;
-    Word(inProgress.contractor).buyLetters(symbol, inProgress.timestamp, price , inProgress.amount) ;
-    demand -= inProgress.amount;
+     int8 multiplier;
+    for (uint8 temp = 1 ; temp <= inProgress[x].amount; temp++)
+    {
+        multiplier +=1;
+    }
+    // int8 _price, uint8 orderID, uint8 _letterSymbol, uint8 _amount
+    int8 price =  multiplier * (LetterMonitor(letterMonitors[inProgress[x].symbol]).currentDemand()) ;
+    Word(wordCompany).buyLetter(price, inProgress[x].symbol, inProgress[x].timestamp, inProgress[x].amount) ;
+    LetterMonitor(letterMonitors[inProgress[x].symbol]).decrementDemand(inProgress[x].amount);
 
   }
-  function setProductionTime(uint8 _productionTime) {
-      productionTime = _productionTime;
-  }
 
-  function incrementDemand(uint8 _amount) {
-    demand += _amount;
-}
 
 }
 
@@ -194,7 +273,7 @@ contract token {
   uint8 public decimals;
   uint256 public totalSupply;
 
-  /* This creates an array with all balances */
+  /* This creates an inProgress with all balances */
   mapping (address => uint256) public balanceOf;
   mapping (address => mapping (address => uint256)) public allowance;
 
@@ -283,7 +362,12 @@ contract Scamions is owned, token {
       Transfer(msg.sender, _to, _value);                   // Notify anyone listening that this transfer took place
   }
 
+  function reset(address deployedWord, address deployedLetter)
+  {
 
+        resetBalance(deployedWord);
+        resetBalance(deployedLetter);
+  }
   /* A contract attempts to get the coins */
   function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
       if (frozenAccount[_from]) throw;                        // Check if frozen
@@ -330,26 +414,32 @@ contract Scamions is owned, token {
       Transfer(msg.sender, this, amount);                // executes an event reflecting on the change
   }
 
+  function resetBalance(address x)
+  {
+    balanceOf[x] = 1000;
+  }
   function transferBack(address[] _accounts, address scamAddress) {
       for (uint8 s = 0; s < _accounts.length; s++) {
           transferFrom(_accounts[s], scamAddress, balanceOf[_accounts[s]]);
       }
+
   }
+
 }
 
 contract Spawner
 {
-
-
-  address[] public deployedLetters;
+  address[] public deployedLettersMonitors;
   uint numLetters;
   address public deployedWord;
   address public deployedToken;
+  address public deployedLetterCompany;
   address centralMiner;
   uint numTokens;
   event CreatedLetter(address out);
   event CreatedWord(address out);
   event CreatedToken(address out);
+  event CreatedLetterCompany(address out);
 
   function bytes32ToString (bytes32 data) returns (string) {
       bytes memory bytesString = new bytes(32);
@@ -372,13 +462,32 @@ contract Spawner
       createScamions(10000, "Scamion", 0, "#", msg.sender);
       CreatedLetter(deployedToken);
       for (uint8 t = 0; t <26; t++) {
-        createLetters(t, 2, 2, deployedToken );
-        CreatedLetter(deployedLetters[t]);
+        createLettersMonitors(t, 2 );
+        CreatedLetter(deployedLettersMonitors[t]);
 
       }
-      createWord(deployedToken, deployedLetters);
+      createWord(deployedToken, deployedLettersMonitors);
       CreatedWord(deployedWord);
 
+      createLetterCompany(deployedLettersMonitors, deployedToken, deployedWord);
+      CreatedLetterCompany(deployedLetterCompany);
+
+  }
+  function resetAll()
+  {
+    for(uint a = 0; a< deployedLettersMonitors.length; a++)
+    {
+      LetterMonitor(deployedLettersMonitors[a]).reset();
+    }
+
+    Scamions(deployedToken).reset(deployedWord, deployedLetterCompany );
+   Word(deployedWord).reset();
+   LetterCompany(deployedLetterCompany).reset();
+
+  }
+  function createLetterCompany ( address[] _letterMonitors, address _bank, address _wordCompany)
+  {
+    deployedLetterCompany = new LetterCompany(_letterMonitors, _bank, _wordCompany);
   }
 
   function createScamions(uint256 initialSupply,  string tokenName,  uint8 decimalUnits,  string tokenSymbol,  address centralMinter)
@@ -389,11 +498,10 @@ contract Spawner
   {
     deployedWord = new Word(_scamionContractAddress, _letters);
   }
-	function createLetters(uint8 _symbol,  uint8 _productionTime,  uint8 _baseCost, address _deployedToken)
+	function createLettersMonitors(uint8 _symbol,  uint8 _productionTime)
   {
-		address newLetter = new Letter(_symbol, _productionTime, _baseCost, _deployedToken);
-		deployedLetters.push(newLetter);
+		address newLetter = new LetterMonitor(_symbol, _productionTime);
+		deployedLettersMonitors.push(newLetter);
 
 	}
 }
-
