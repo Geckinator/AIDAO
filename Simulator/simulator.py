@@ -1,6 +1,6 @@
 __author__ = 'Konstantinos'
 
-import re
+from utils import *
 from collections import Counter
 
 letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
@@ -21,6 +21,7 @@ class Simulator(object):
         self.factory.words_queue = []
         self.factory.completed_words = 0
         self.factory.counts = Counter()
+        self.factory.accum_money = 0
 
     def run(self, iterations, verbose=False, debug=False):
         self.initialize()
@@ -30,9 +31,9 @@ class Simulator(object):
         self.iterations = iterations
         f = open(self.text_file, 'r')
 
-        for word in self.generate_word(f):
+        for word in generate_word(f):
             if verbose:
-                print '---------------------------------------------'
+                print '------------- time:' + str(time) + '---------------------------'
             time += 1
             letters_distribution = Counter(word)
             self.factory.counts += letters_distribution
@@ -41,9 +42,11 @@ class Simulator(object):
             self.factory.words_queue.append((''.join(word), time))
             self.update_production_queue(time)
 
-            # self.factory.fill_missing_letters(time)
-            self.factory.plan(avg_length, time, self.rand)
+            # ---- Actions -----
             self.factory.react_to_incoming_word(letters_distribution, time)
+            #self.factory.plan(avg_length, time, self.rand)
+            # self.factory.scan_and_fill(time)
+
             if verbose:
                 print 'orders queue', [el[0] for el in self.factory.words_queue], '\np_time',
                 print [pr_time for pr_time in self.factory.prod_times.values()], '\nletters',
@@ -56,28 +59,13 @@ class Simulator(object):
 
             self.factory.ship_ready_products(time)
             mean_queue_length += (len(self.factory.words_queue) - mean_queue_length) / float(time)
+            if time == self.iterations:
+                break
         f.close()
         print 'Served', self.factory.completed_words, 'words with average word length:', avg_length
-        print self.reward_function(time, mean_queue_length)
+        print 'perf metric:', self.reward_function(time, mean_queue_length)
+        print 'total <<money>>: ', self.factory.accum_money
         return self.factory.mean_service_time, mean_queue_length
-
-    def generate_word(self, a_file):
-        i = 0
-        done = False
-        while i < self.iterations and not done:
-            for line in a_file:
-                words = re.findall(r'\w+', line)
-                if len(words) == 0:
-                    continue
-                for w in words:
-                    yield ''.join([char for char in w.lower() if char.isalpha()])
-                    i += 1
-                    if i == self.iterations:
-                        done = True
-                        break
-                if done:
-                    break
-            # done = True
 
     def update_production_queue(self, current_time):
         for key, value in self.factory.production_queue.iteritems():
