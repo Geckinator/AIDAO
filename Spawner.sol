@@ -212,10 +212,14 @@ contract LetterCompany {
          OrderPlaced("Letter order has been placed");
       }
   }
+function getFreeSlots() constant returns(uint x)
+{
+return maxSlots- inProgress.length;
+}
   function sellifReady()
   {
 
-    for(uint8 t = 0 ; t > inProgress.length ; t++ )
+    for(uint8 t = 0 ; t < inProgress.length ; t++ )
     if (inProgress[t].timestamp + inProgress[t].productionTime <= ticker)
     {
       sellLetter(t);
@@ -232,12 +236,12 @@ contract LetterCompany {
   function sellLetter(uint8 x)
   {
      int8 multiplier;
-    for (uint8 temp = 1 ; temp <= inProgress[x].amount; temp++)
+    for (uint8 temp = 1; temp <= inProgress[x].amount; temp++)
     {
         multiplier +=1;
     }
-    // int8 _price, uint8 orderID, uint8 _letterSymbol, uint8 _amount
-    int8 price =  multiplier * (LetterMonitor(letterMonitors[inProgress[x].symbol]).currentDemand()) ;
+    int8 demand = LetterMonitor(letterMonitors[inProgress[x].symbol]).currentDemand();
+    int8 price =  (demand * (demand + 1) - (demand - multiplier) * (demand - multiplier + 1)) / 2;
     Word(wordCompany).buyLetter(price, inProgress[x].symbol, inProgress[x].timestamp, inProgress[x].amount) ;
     LetterMonitor(letterMonitors[inProgress[x].symbol]).decrementDemand(inProgress[x].amount);
 
@@ -434,7 +438,7 @@ contract Spawner
   address public deployedWord;
   address public deployedToken;
   address public deployedLetterCompany;
-  address centralMiner;
+  address public centralMiner;
   uint numTokens;
   event CreatedLetter(address out);
   event CreatedWord(address out);
@@ -473,6 +477,45 @@ contract Spawner
       CreatedLetterCompany(deployedLetterCompany);
 
   }
+
+  function  getMonitorAddress1() constant returns(address a,address b,address c,address d,address e,address f,address g,address h,address i)
+  {
+    a = deployedLettersMonitors[0] ;
+    b= deployedLettersMonitors[1];
+    c= deployedLettersMonitors[2];
+    d= deployedLettersMonitors[3];
+    e= deployedLettersMonitors[4];
+    f= deployedLettersMonitors[5];
+    g= deployedLettersMonitors[6];
+    h= deployedLettersMonitors[7];
+    i= deployedLettersMonitors[8];
+  }
+  function  getMonitorAddress2() constant returns(address a,address b,address c,address d,address e,address f,address g,address h,address i)
+  {
+    a = deployedLettersMonitors[9] ;
+    b= deployedLettersMonitors[10];
+    c= deployedLettersMonitors[11];
+    d= deployedLettersMonitors[12];
+    e= deployedLettersMonitors[13];
+    f= deployedLettersMonitors[14];
+    g= deployedLettersMonitors[15];
+    h= deployedLettersMonitors[16];
+    i= deployedLettersMonitors[17];
+  }
+  function  getMonitorAddress3() constant returns(address a,address b,address c,address d,address e,address f,address g,address h)
+  {
+    a = deployedLettersMonitors[18] ;
+    b= deployedLettersMonitors[19];
+    c= deployedLettersMonitors[20];
+    d= deployedLettersMonitors[21];
+    e= deployedLettersMonitors[22];
+    f= deployedLettersMonitors[23];
+    g= deployedLettersMonitors[24];
+    h= deployedLettersMonitors[25];
+
+
+  }
+
   function resetAll()
   {
     for(uint a = 0; a< deployedLettersMonitors.length; a++)
