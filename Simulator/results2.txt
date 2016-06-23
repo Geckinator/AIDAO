@@ -1,0 +1,24 @@
+words: 250 reps: 100, mean: 239 std: 0.07
+
+words: 250 reps: 100, mean: 239 std: 0.39
+
+words: 250 reps: 10, mean: 238 std: 1.15 min 1 max 5
+
+words: 250 reps: 100, mean: 239 std: 0.41 min 1 max 5
+
+words: 500 reps: 10, mean: 488 std: 3.66 min 1 max 5
+
+words: 500 reps: 10, mean: 485 std: 8.52 min 1 max 10
+
+words: 500 reps: 100, mean: 488 std: 2.93 min 1 max 10
+
+words: 1000 reps: 10, mean: 965 std: 61.03 min 1 max 5
+
+words: 100 reps: 10, mean: 27 std: 27.55 min 1 max 5
+
+words: 100 reps: 10, mean: 30 std: 29.57 min 1 max 5
+
+words: 100 reps: 10, mean: 30 std: 29.57 min 1 max 5
+
+words: 100 reps: 10, mean: 30 std: 29.75 min 1 max 5
+

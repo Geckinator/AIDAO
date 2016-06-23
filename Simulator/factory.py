@@ -3,6 +3,7 @@ __author__ = 'Konstantinos'
 letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
            'w', 'x', 'y', 'z')
 from collections import Counter, defaultdict
+import operator
 
 
 class MegaFactory(object):
@@ -14,6 +15,18 @@ class MegaFactory(object):
         self.rates = dict.fromkeys(letters)
         self.production_queue = defaultdict(list)
         self.free_slots = capacity
+        self.words_queue = []
+        self.completed_words = 0
+        self.mean_service_time = 0
+        self.counts = Counter()
+        self.accum_money = 0
+
+    def initialize(self):
+        self.unmet_demand = Counter()
+        self.stock = Counter()
+        self.rates = dict.fromkeys(letters)
+        self.production_queue = defaultdict(list)
+        self.free_slots = self.capacity
         self.words_queue = []
         self.completed_words = 0
         self.mean_service_time = 0
@@ -43,8 +56,18 @@ class MegaFactory(object):
             self.mean_service_time += (current_time - word_order[1] - self.mean_service_time) / float(
                 self.completed_words)
             self.words_queue.remove(word_order)
-            self.accum_money += sum(self.unmet_demand[char] for char in counts.iterkeys())
+            self.accum_money += sum(self.unmet_demand[char] * val for char, val in counts.iteritems())
             self.unmet_demand -= counts
+
+    def act(self, plan, letter_distribution, current_time, min1, max1):
+        """
+        :type plan: integer
+        """
+        if plan == 1:
+            self.react_to_incoming_word(letter_distribution, current_time)
+        elif plan == 2:
+            self.react_to_incoming_word(letter_distribution, current_time)
+            self.plan2(current_time, min1, max1)
 
     def react_to_incoming_word(self, letter_distribution, current_time):
         """counts
@@ -57,14 +80,23 @@ class MegaFactory(object):
                 self.insert_into_production_slot(key, diff, current_time)
 
     def plan(self, avg_word_length, current_time, a_random):
-        if current_time % 3 != 0:
-            return
-        if self.free_slots < self.capacity / 2:
-            return
-        pick = a_random.random()
-        for char_tuple in self.counts.most_common(int(avg_word_length / 1)):
-            if pick < self.get_rate(char_tuple[0], current_time):
-                self.insert_into_production_slot(char_tuple[0], 1, current_time)
+        if self.free_slots > self.capacity / 2:
+            pick = a_random.random()
+            for char_tuple in self.counts.most_common(int(avg_word_length / 1)):
+                if pick < self.get_rate(char_tuple[0], current_time) and self.stock[char_tuple[0]] < 6:
+                    self.insert_into_production_slot(char_tuple[0], 1, current_time)
+
+    def plan2(self, current_time, min1, max1):
+        if self.free_slots > self.capacity / 2:
+            for l in letters:
+                if self.get_rate(l, current_time) != 0:
+                    if self.stock[l] + self.get_number_under_production(l) < (min1 + max1 + 5) / 2.0:
+                        schedule_time = int(1 / self.get_rate(l, current_time)) - self.prod_times[l]
+                        if schedule_time < 0:
+                            schedule_time = current_time
+                        else:
+                            schedule_time += current_time
+                        self.insert_into_production_slot(l, 1, schedule_time)
 
     def get_number_under_production(self, letter):
         return sum(order[0] for order in self.production_queue[letter])
@@ -81,6 +113,24 @@ class MegaFactory(object):
         for word_order in self.words_queue:
             self.sell_word(word_order, current_time)
 
+    def sell_ready_letters(self):
+        """
+        Trys to sell letters in stock for which there exists a non-zero demand
+        """
+        for char, amount in self.stock.iteritems():
+            if self.unmet_demand[char] > 0:
+                if self.unmet_demand[char] > amount:
+                    self.sell_a_letter(char, amount)
+                else:
+                    self.sell_a_letter(char, self.unmet_demand[char])
+
+    def sell_a_letter(self, char, amount):
+        assert(self.stock[char] >= amount)
+        self.stock[char] -= amount
+        self.accum_money += self.unmet_demand[char] * amount
+        self.unmet_demand[char] -= amount
+        self.free_slots += amount
+
     def initialize_random_prod_times(self, min_dur, max_dur, random):
         self.prod_times = dict(zip(letters, [random.randint(min_dur, max_dur) for l in letters]))
 
@@ -91,6 +141,10 @@ class MegaFactory(object):
                 return False
         return True
 
+    def scan_and_fill_2(self, current_time):
+        for key, val in self.unmet_demand.iteritems():
+            self.insert_into_production_slot(key, val, current_time)
+
     def scan_and_fill(self, current_time):
         for word in self.words_queue:
             self.fill_missing_letters(word, current_time)
@@ -100,7 +154,3 @@ class MegaFactory(object):
             diff = self.unmet_demand[char] - (self.get_number_under_production(char) + self.stock[char])
             if diff > 0:
                 self.insert_into_production_slot(char, diff, current_time)
-"""
-     diff = self.unmet_demand[key] - (self.get_number_under_production(key) + self.stock[key])
-            if diff > 0:
-                self.insert_into_production_slot(key, diff, current_time)"""

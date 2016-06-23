@@ -1,0 +1,10 @@
+words: 100 reps: 100, mean: 13 std: 14.44
+
+words: 250 reps: 100, mean: 21 std: 35.63
+
+words: 100 reps: 10, mean: 53 std: 17.34 min 1 max 3
+
+words: 100 reps: 10, mean: 53 std: 17.34 min 1 max 3
+
+words: 100 reps: 10, mean: 35 std: 22.79 min 1 max 5
+
