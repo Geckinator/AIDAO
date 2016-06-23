@@ -170,7 +170,6 @@ contract LetterCompany {
   {
     uint8 productionTime;
     uint8 timestamp;
-    uint8 amount;
     uint8 symbol;
   }
   orders[] public inProgress;
@@ -203,12 +202,14 @@ contract LetterCompany {
         delete inProgress[inProgress.length-1];
         inProgress.length--;
     }
-  function startProduction( uint8 _symbol, uint8 _amount)
+  function startProduction( uint8[] letters)
   {
       if (inProgress.length <= maxSlots)
       {
-         inProgress.push(orders(LetterMonitor(letterMonitors[_symbol]).productionTime(), ticker, _amount, _symbol));
-
+        for (uint t= 0; t < letters.length; t++)
+        {
+         inProgress.push(orders(LetterMonitor(letterMonitors[letters[t]]).productionTime(), ticker, letters[t]));
+        }
          OrderPlaced("Letter order has been placed");
       }
   }
@@ -235,15 +236,10 @@ return maxSlots- inProgress.length;
   }
   function sellLetter(uint8 x)
   {
-     int8 multiplier;
-    for (uint8 temp = 1; temp <= inProgress[x].amount; temp++)
-    {
-        multiplier +=1;
-    }
+
     int8 demand = LetterMonitor(letterMonitors[inProgress[x].symbol]).currentDemand();
-    int8 price =  (demand * (demand + 1) - (demand - multiplier) * (demand - multiplier + 1)) / 2;
-    Word(wordCompany).buyLetter(price, inProgress[x].symbol, inProgress[x].timestamp, inProgress[x].amount) ;
-    LetterMonitor(letterMonitors[inProgress[x].symbol]).decrementDemand(inProgress[x].amount);
+    Word(wordCompany).buyLetter(demand, inProgress[x].symbol, inProgress[x].timestamp, 1) ;
+    LetterMonitor(letterMonitors[inProgress[x].symbol]).decrementDemand(1);
 
   }
 

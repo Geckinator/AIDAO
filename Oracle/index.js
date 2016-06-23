@@ -22,17 +22,18 @@ provider = localhost; // the provider is going to be set as the local host( our 
 web3.setProvider(new web3.providers.HttpProvider(provider));
 coinbase = web3.eth.coinbase; //get the coinbase address
 
-spawner = web3.eth.contract([{"constant":false,"inputs":[],"name":"runSpawner","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"getMonitorAddress2","outputs":[{"name":"a","type":"address"},{"name":"b","type":"address"},{"name":"c","type":"address"},{"name":"d","type":"address"},{"name":"e","type":"address"},{"name":"f","type":"address"},{"name":"g","type":"address"},{"name":"h","type":"address"},{"name":"i","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"getMonitorAddress1","outputs":[{"name":"a","type":"address"},{"name":"b","type":"address"},{"name":"c","type":"address"},{"name":"d","type":"address"},{"name":"e","type":"address"},{"name":"f","type":"address"},{"name":"g","type":"address"},{"name":"h","type":"address"},{"name":"i","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"deployedLetterCompany","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"_letterMonitors","type":"address[]"},{"name":"_bank","type":"address"},{"name":"_wordCompany","type":"address"}],"name":"createLetterCompany","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"getMonitorAddress3","outputs":[{"name":"a","type":"address"},{"name":"b","type":"address"},{"name":"c","type":"address"},{"name":"d","type":"address"},{"name":"e","type":"address"},{"name":"f","type":"address"},{"name":"g","type":"address"},{"name":"h","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"deployedToken","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"_symbol","type":"uint8"},{"name":"_productionTime","type":"uint8"}],"name":"createLettersMonitors","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"data","type":"bytes32"}],"name":"bytes32ToString","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"deployedLettersMonitors","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"deployedWord","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"initialSupply","type":"uint256"},{"name":"tokenName","type":"string"},{"name":"decimalUnits","type":"uint8"},{"name":"tokenSymbol","type":"string"},{"name":"centralMinter","type":"address"}],"name":"createScamions","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_scamionContractAddress","type":"address"},{"name":"_letters","type":"address[]"}],"name":"createWord","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"resetAll","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"centralMiner","outputs":[{"name":"","type":"address"}],"type":"function"},{"inputs":[{"name":"cntr_miner","type":"address"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"address"}],"name":"CreatedLetter","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"address"}],"name":"CreatedWord","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"address"}],"name":"CreatedToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"address"}],"name":"CreatedLetterCompany","type":"event"}]).at("0x720858012caf69797Da18169eD8317d9ABfb7689");
+spawner = web3.eth.contract([{"constant":false,"inputs":[],"name":"runSpawner","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"getMonitorAddress2","outputs":[{"name":"a","type":"address"},{"name":"b","type":"address"},{"name":"c","type":"address"},{"name":"d","type":"address"},{"name":"e","type":"address"},{"name":"f","type":"address"},{"name":"g","type":"address"},{"name":"h","type":"address"},{"name":"i","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"getMonitorAddress1","outputs":[{"name":"a","type":"address"},{"name":"b","type":"address"},{"name":"c","type":"address"},{"name":"d","type":"address"},{"name":"e","type":"address"},{"name":"f","type":"address"},{"name":"g","type":"address"},{"name":"h","type":"address"},{"name":"i","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"deployedLetterCompany","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"_letterMonitors","type":"address[]"},{"name":"_bank","type":"address"},{"name":"_wordCompany","type":"address"}],"name":"createLetterCompany","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"getMonitorAddress3","outputs":[{"name":"a","type":"address"},{"name":"b","type":"address"},{"name":"c","type":"address"},{"name":"d","type":"address"},{"name":"e","type":"address"},{"name":"f","type":"address"},{"name":"g","type":"address"},{"name":"h","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"deployedToken","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"_symbol","type":"uint8"},{"name":"_productionTime","type":"uint8"}],"name":"createLettersMonitors","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"data","type":"bytes32"}],"name":"bytes32ToString","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"deployedLettersMonitors","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"deployedWord","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"initialSupply","type":"uint256"},{"name":"tokenName","type":"string"},{"name":"decimalUnits","type":"uint8"},{"name":"tokenSymbol","type":"string"},{"name":"centralMinter","type":"address"}],"name":"createScamions","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_scamionContractAddress","type":"address"},{"name":"_letters","type":"address[]"}],"name":"createWord","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"resetAll","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"centralMiner","outputs":[{"name":"","type":"address"}],"type":"function"},{"inputs":[{"name":"cntr_miner","type":"address"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"address"}],"name":"CreatedLetter","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"address"}],"name":"CreatedWord","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"address"}],"name":"CreatedToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"address"}],"name":"CreatedLetterCompany","type":"event"}]).at("0x6522504ABeD55EC3FEd34B39f378f0e550F7898f");
 
 bank =web3.eth.contract([{"constant":false,"inputs":[{"name":"deployedWord","type":"address"},{"name":"deployedLetter","type":"address"}],"name":"reset","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"newSellPrice","type":"uint256"},{"name":"newBuyPrice","type":"uint256"}],"name":"setPrices","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint81"}],"type":"function"},{"constant":false,"inputs":[{"name":"_accounts","type":"address[]"},{"name":"scamAddress","type":"address"}],"name":"transferBack","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"sellPrice","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"standard","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"mintedAmount","type":"uint256"}],"name":"mintToken","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"buyPrice","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[],"name":"buy","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"frozenAccount","outputs":[{"name":"","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"x","type":"address"}],"name":"resetBalance","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"approveAndCall","outputs":[{"name":"success","type":"bool"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"sell","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"target","type":"address"},{"name":"freeze","type":"bool"}],"name":"freezeAccount","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"type":"function"},{"inputs":[{"name":"initialSupply","type":"uint256"},{"name":"tokenName","type":"string"},{"name":"decimalUnits","type":"uint8"},{"name":"tokenSymbol","type":"string"},{"name":"centralMinter","type":"address"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"target","type":"address"},{"indexed":false,"name":"frozen","type":"bool"}],"name":"FrozenFunds","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}]).at(spawner.deployedToken());
 
 letterMonitor = web3.eth.contract([{"constant":false,"inputs":[],"name":"tickTime","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_productionTime","type":"uint8"}],"name":"setProductionTime","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"productionTime","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint8"}],"name":"incrementDemand","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint8"}],"name":"decrementDemand","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[],"name":"currentDemand","outputs":[{"name":"","type":"int8"}],"type":"function"},{"constant":false,"inputs":[],"name":"reset","outputs":[],"type":"function"},{"inputs":[{"name":"_symbol","type":"uint8"},{"name":"_productionTime","type":"uint8"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"string"}],"name":"TimeAdvanced","type":"event"}]);
 wordCompany = web3.eth.contract([{"constant":false,"inputs":[{"name":"orderId","type":"uint8"}],"name":"sellWord","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_price","type":"int8"},{"name":"orderID","type":"uint8"},{"name":"_letterSymbol","type":"uint8"},{"name":"_amount","type":"uint8"}],"name":"buyLetter","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_letters","type":"uint8[]"},{"name":"_amounts","type":"uint8[]"}],"name":"incrementDemand","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint8"}],"name":"letterMonitors","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"_letterSymbol","type":"uint8"},{"name":"orderID","type":"uint8"},{"name":"_price","type":"uint8"},{"name":"_amount","type":"uint8"}],"name":"isWordReady","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"ticker","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"name":"orders","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint8"},{"name":"","type":"uint256"}],"name":"diffLetters","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[],"name":"reset","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"advanceTime","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"scamionContractAddress","outputs":[{"name":"","type":"address"}],"type":"function"},{"inputs":[{"name":"_scamionContractAddress","type":"address"},{"name":"_letters","type":"address[]"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"string"}],"name":"AdvancedTime","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"string"}],"name":"OrderPlaced","type":"event"}]).at(spawner.deployedWord());
 
-var letterCompany= web3.eth.contract([{"constant":true,"inputs":[],"name":"getFreeSlots","outputs":[{"name":"x","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint8"}],"name":"letterMonitors","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"index","type":"uint256"}],"name":"remove","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"inProgress","outputs":[{"name":"productionTime","type":"uint8"},{"name":"timestamp","type":"uint8"},{"name":"amount","type":"uint8"},{"name":"symbol","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[],"name":"bank","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"ticker","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"x","type":"uint8"}],"name":"sellLetter","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"maxSlots","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[],"name":"reset","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"advanceTime","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"sellifReady","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_symbol","type":"uint8"},{"name":"_amount","type":"uint8"}],"name":"startProduction","outputs":[],"type":"function"},{"inputs":[{"name":"_letterMonitors","type":"address[]"},{"name":"_bank","type":"address"},{"name":"_wordCompany","type":"address"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"string"}],"name":"AdvancedTime","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"string"}],"name":"OrderPlaced","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"string"}],"name":"LetterWasBusy","type":"event"}]).at(spawner.deployedLetterCompany());
+var letterCompany= web3.eth.contract([{"constant":true,"inputs":[],"name":"getFreeSlots","outputs":[{"name":"x","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint8"}],"name":"letterMonitors","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"index","type":"uint256"}],"name":"remove","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"inProgress","outputs":[{"name":"productionTime","type":"uint8"},{"name":"timestamp","type":"uint8"},{"name":"symbol","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[],"name":"bank","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"ticker","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"letters","type":"uint8[]"}],"name":"startProduction","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"x","type":"uint8"}],"name":"sellLetter","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"maxSlots","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[],"name":"reset","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"advanceTime","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"sellifReady","outputs":[],"type":"function"},{"inputs":[{"name":"_letterMonitors","type":"address[]"},{"name":"_bank","type":"address"},{"name":"_wordCompany","type":"address"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"string"}],"name":"AdvancedTime","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"string"}],"name":"OrderPlaced","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"out","type":"string"}],"name":"LetterWasBusy","type":"event"}]).at(spawner.deployedLetterCompany());
 
 // letterMonitorAddresses =new Array(26);
-productionTimes = new Array(26)
+var iterations = 1;
+productionTimes = new Array(26);
 slots = new Array(10);
 console.log('Welcome')
 blockChainDemand = new Array(26);
@@ -94,50 +95,59 @@ lineReader.on('line', function (line) {
     //   // var letterHash = demand
     // }
     while (web3.eth.getTransaction(demandHash).blockNumber == null)
-    {       process.stdout.write("Waiting for demands to increase.\r");}
+    {       process.stdout.write("Waiting for demands to increase.                   \r");}
 
     var sellHash = letterCompany.sellifReady();
 
     while(web3.eth.getTransaction(sellHash).blockNumber==null)
     {
-      process.stdout.write("Waiting for letters to be sold..\r");
+      process.stdout.write("Waiting for letters to be sold.                            .\r");
     }
 
     /* Getting Monitor demands */
 
       for (a = 0; a < letterMonitorAddresses.length; a++) {
         var temp = letterMonitor.at(letterMonitorAddresses[a]).currentDemand();
-        blockChainDemand[a].push(temp);
+        blockChainDemand[a].push(temp)
+        if (iterations > 30)
+        {
+        blockChainDemand[a].shift();
+        }
       }
 
     /* Getting letter company slots*/
-    orders = letterCompany.inProgress();
-    maxSlots = letterCompany.maxSlots();
+    var freeSlots = letterCompany.getFreeSlots();
 
-    // /* Make informed decision using python Oracle */
-    // child_process = require('child_process');
-    // history = child_process.execSync('python input.py -t ' + JSON.stringify(blockChainDemand) + JSON.stringify(maxSlots- orders.length));
-    //
-    // /* Make orders */
-    // var productionHash = letterCompany.startProduction(history[0], history[1]);
-    // while (web3.eth.getTransaction(productionHash).blockNumber == null);
-    // {
-    //   process.stdout.write("Waiting for production to start \r");
-    //
-    // }
+    /* Make informed decision using python Oracle */
+    if(iterations > 8)
+    {
+
+    var child_process = require('child_process');
+      var history = child_process.execSync('python input.py -t ' + JSON.stringify(blockChainDemand) + ' -u ' +  JSON.stringify(productionTimes) + ' -v ' + JSON.stringify(freeSlots));
+      process.stdout.write(history);
+      var lettersToProduce = JSON.parse(history.toString());
+    /* Make orders */
+    var diffLetters
+    var productionHash = letterCompany.startProduction(lettersToProduce);
+    while (web3.eth.getTransaction(productionHash).blockNumber == null);
+  }
+    {
+      process.stdout.write("Waiting for production to start \r");
+
+    }
 
 
     /* Now tick the time */
     var wCtimeHash =wordCompany.advanceTime();
     while( web3.eth.getTransaction(wCtimeHash).blockNumber == null)
     {
-      process.stdout.write("Waiting for word company time to advance \r");
+      process.stdout.write("Waiting for word company time to advance                    \r");
 
     }
     var lCtimeHash = letterCompany.advanceTime();
     while (web3.eth.getTransaction(lCtimeHash).blockNumber == null)
     {
-        process.stdout.write("Waiting for lettercompany time to advance \r");
+        process.stdout.write("Waiting for lettercompany time to advance               \r");
     }
     var MonitortimeHash;
     MonitortimeHash = new Array(25)
@@ -146,9 +156,10 @@ lineReader.on('line', function (line) {
     }
     while (web3.eth.getTransaction(MonitortimeHash[25]).blockNumber == null)
   {
-    process.stdout.write("Waiting for monitors time to advance \r");
+    process.stdout.write("Waiting for monitors time to advance   \r");
 
   }
+  iterations+=1;
 
 
 
