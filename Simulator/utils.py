@@ -25,7 +25,7 @@ def replicate(simulator, words_to_read, iterations, plan):
         obs = np.empty(iterations)
         for i in xrange(iterations):
             simulator.rand.seed(i)
-            simulator.factory.free_slots = simulator.factory.capacity
+            simulator.factory.initialize_random_prod_times(simulator.min, simulator.max, simulator.rand)
             obs[i] = simulator.run(words_to_read, plan, verbose=False)
 
         mean = sum(obs) / float(iterations)
@@ -58,4 +58,3 @@ def draw_graph(text_file, num_of_words):
         os.makedirs('figures/')
         plt.savefig('figures/trend_graph' + text_file + str(num_of_words) + '.png')
     plt.close()
-

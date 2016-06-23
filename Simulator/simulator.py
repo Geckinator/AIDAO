@@ -1,8 +1,12 @@
 __author__ = 'Konstantinos'
 
-from statsmodels.tsa.arima_model import ARIMA
+from scipy.interpolate import spline
+import matplotlib.pyplot as plt
+import sys
+from factory import *
 from utils import *
 from collections import Counter
+from random import Random
 import pandas as pd
 
 letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
@@ -54,10 +58,10 @@ class Simulator(object):
                 if i > 0:
                     self.window[char][i] = self.window[char][i - 1] + Simulator.number_of_letters_in_word(char, c)
                 else:
-                    self.window[char][i] = Simulator.number_of_letters_in_word(char, c)
+                    self.window[char][i] = Simulator.number_of_letters_in_word(char, c)"""
             if i == self.win_size - 1:
                 break
-            """
+
         for word in generate_word(f):
 
             # prediction = self.fit_model()
@@ -91,13 +95,13 @@ class Simulator(object):
                 print 'prod  ', [self.factory.get_number_under_production(char) for char in letters]
                 print 'stock ', [self.factory.get_stock_number(char) for char in letters]
                 print 'free slots:', self.factory.free_slots, '\n'
-                print self.factory.production_queue
+                # print self.factory.production_queue
             if self.time >= self.iterations:
                 break
         f.close()
         print 'p_time', [pr_time for pr_time in self.factory.prod_times.values()], '\nletters',
-        for l in letters:
-            print l.upper() + ',',
+        for l1 in letters:
+            print l1.upper() + ',',
         print '\ndemand', [self.factory.unmet_demand[i] for i in letters]
         print 'prod  ', [self.factory.get_number_under_production(char) for char in letters]
         print 'stock ', [self.factory.get_stock_number(char) for char in letters]
@@ -142,30 +146,12 @@ class Simulator(object):
             metric = 100
         return 1 - metric / float(100)
 
-    def update_window(self, word_counter):
+    """def update_window(self, word_counter):
         assert isinstance(word_counter, Counter)
         self.window = self.window.drop(0).reset_index().ix[:, 1:len(self.window.columns) + 1]
         self.window.loc[len(self.window)] = 0
         for c in letters:
-            self.window[c][self.win_size - 1] += self.window[c][self.win_size - 2] + Simulator.number_of_letters_in_word(c, word_counter)
-
-    def replicate(self, number_of_words, repetitions):
-        res = self.run(number_of_words, verbose=False)
-        mean_service_time_i, mean_queue_length_i = res[0], res[1]
-        var_service_time_i = 0
-        var_queue_length_i = 0
-        for i in xrange(2, repetitions + 1):
-            self.factory.initialize_random_prod_times(1, 3, self.rand)
-            res = self.run(number_of_words, verbose=False)
-            new_mean_service_time_i = mean_service_time_i + (res[0] - mean_service_time_i) / float(i)
-            var_service_time_i = (1 - 1.0 / (i - 1)) * var_service_time_i + i * pow(
-                new_mean_service_time_i - mean_service_time_i, 2)
-            mean_service_time_i = new_mean_service_time_i
-            new_mean_queue_length_i = mean_queue_length_i + (res[0] - mean_queue_length_i) / float(i)
-            var_queue_length_i = (1 - 1.0 / (i - 1)) * var_queue_length_i + i * pow(
-                new_mean_queue_length_i - mean_queue_length_i, 2)
-            mean_queue_length_i = new_mean_queue_length_i
-        return (mean_service_time_i, var_service_time_i), (mean_queue_length_i, var_queue_length_i)
+            self.window[c][self.win_size - 1] += self.window[c][self.win_size - 2] + Simulator.number_of_letters_in_word(c, word_counter)"""
 
     @staticmethod
     def number_of_letters_in_word(char, counter_of_word):
@@ -181,7 +167,7 @@ class Simulator(object):
         self.avg_word_length += (sum(letters_distribution.itervalues()) - self.avg_word_length) / float(self.time)
         self.factory.words_queue.append((''.join(word), self.time))
 
-    def fit_model(self):
+    """def fit_model(self):
         # ArimaResultsClass
         self.window['ind'] = self.window.index
         #  use date as index
@@ -191,4 +177,65 @@ class Simulator(object):
         d = ARIMA(self.window.astype(float).a, order=(1, 0, 0))
         res = d.fit()
         del self.window['ind']
-        return res
+        return res"""
+
+    def sim_and_plot(self, a_plan):
+        fi = open(self.text_file, 'r')
+        demand = defaultdict(list)
+        for i, word in enumerate(generate_word(fi)):
+            self.time += 1
+            c = Counter(word)
+            self.update_stats(word, c)
+            for c1 in letters:
+                demand[c1].append(self.factory.unmet_demand[c1])
+            self.update_production_queue(self.time)
+            # ----- Actions ------
+            self.factory.react_to_incoming_word(c, self.time)
+
+            if i == self.win_size - 1:
+                break
+        for word in generate_word(fi):
+            self.time += 1
+            letters_distribution = Counter(word)
+            self.update_stats(word, letters_distribution)
+            for c1 in letters:
+                demand[c1].append(self.factory.unmet_demand[c1])
+            self.update_production_queue(self.time)
+            # ---- Actions -----
+            self.factory.act(a_plan, letters_distribution, self.time, self.min, self.max)
+            self.factory.sell_ready_letters()
+            self.cumul_reward += self.reward_function_2()
+            if self.time >= self.iterations:
+                break
+        fi.close()
+        print 'total reward', self.cumul_reward
+        interpolate_factor = 5
+        # xnew = np.linspace(T.min(),T.max(),300)
+        # power_smooth = spline(T,power,xnew)
+        # plt.plot(xnew,power_smooth)
+        for c1 in letters:
+            plt.plot(np.linspace(1, self.iterations, self.iterations * interpolate_factor), spline([ii for ii in range(self.iterations)], np.array(demand[c1]), np.linspace(1, self.iterations, self.iterations * interpolate_factor)))
+        plt.xlabel('Time')
+        plt.ylabel('Demand')
+        plt.title('Cumulative Demand graph')
+        plt.legend(letters)
+        try:
+            plt.savefig('figures/' + self.text_file + '_' + 'words' + str(self.iterations) + '_' + 'plan' + str(a_plan) + '_mm' + str(self.min) + str(self.max) + '.png')
+        except IOError:
+            os.makedirs('figures/')
+            plt.savefig('figures/' + self.text_file + '_' + 'words' + str(self.iterations) + '_' + 'plan' + str(a_plan) + '_mm' + str(self.min) + str(self.max) + '.png')
+        plt.close()
+        return self.cumul_reward
+
+
+if __name__ == '__main__':
+    capacity = int(sys.argv[1])
+    rand = Random()
+    min_pdur = int(sys.argv[2])
+    max_pdur = int(sys.argv[3])
+    factory = MegaFactory(capacity, [rand.randint(min_pdur, max_pdur) for l in letters])
+    book = 'Alice.txt'
+    sim = Simulator(book, factory, min_pdur, max_pdur, rand)
+    sim.iterations = int(sys.argv[4])
+    plan = int(sys.argv[5])
+    sim.sim_and_plot(plan)

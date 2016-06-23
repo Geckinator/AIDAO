@@ -8,3 +8,13 @@ words: 100 reps: 10, mean: 53 std: 17.34 min 1 max 3
 
 words: 100 reps: 10, mean: 35 std: 22.79 min 1 max 5
 
+words: 100 reps: 10, mean: 0 std: 0.00 min 1 max 5
+
+words: 100 reps: 10, mean: 0 std: 0.00 min 1 max 5
+
+words: 100 reps: 10, mean: 0 std: 0.00 min 1 max 5
+
+words: 100 reps: 10, mean: 80 std: 0.00 min 1 max 5
+
+words: 1000 reps: 100, mean: 873 std: 12.14 min 1 max 5
+

@@ -20,7 +20,7 @@ factory = MegaFactory(capacity, [rand.randint(min_dur, max_dur) for l in letters
 book = 'Alice.txt'
 book1 = '../a.txt'  # has 10 words
 f = open(book, 'r')
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     n = int(sys.argv[1])  # of words to read
 verb = False
 if len(sys.argv) == 3:
@@ -29,17 +29,19 @@ if len(sys.argv) == 3:
 
 sim = Simulator(book, factory, min_dur, max_dur, rand)
 plan = 2
-# mean_service_time, avg_queue_length, money, total_reward = sim.run(n, 2, verbose=verb)
-
+#perf = sim.run(n, 1, verbose=verb)
+#print 'perf:', perf
 # print 'Average Service Time:', mean_service_time
 # print 'Average queue length:', avg_queue_length
 # print 'Total money:', money
 # print 'Total reward:', total_reward
 
-# replicate(sim, 100, 10, 2)
+replicate(sim, 1000, 100, 2)
 
-draw_graph(book, 100)
+#draw_graph(book, 100)
 
 # print replicate(sim, n, 100)
+
+
 
 
