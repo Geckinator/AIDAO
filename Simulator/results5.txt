@@ -1,0 +1,6 @@
+words: 500 reps: 100, mean: 196 std: 24.22 min 2 max 5
+
+words: 2000 reps: 10, mean: 536 std: 161.15 min 2 max 5
+
+words: 1000 reps: 100, mean: 143 std: 98.19 min 5 max 15
+
