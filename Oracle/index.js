@@ -44,11 +44,10 @@ while(web3.eth.getTransaction(banksetupHash).blockNumber == true)
   process.stdout.write("Waiting for scamions to be printed..\r");
 }
 //console.log(letterMonitorAddresses[]);
+letterMonitorAddresses= spawner.getMonitorAddress1();
+letterMonitorAddresses=   letterMonitorAddresses.concat(spawner.getMonitorAddress2());
+letterMonitorAddresses=   letterMonitorAddresses.concat(spawner.getMonitorAddress3());
 for (c = 0; c < alphabet.length; c++) {
-  letterMonitorAddresses= spawner.getMonitorAddress1();
-  letterMonitorAddresses=   letterMonitorAddresses.concat(spawner.getMonitorAddress2());
-  letterMonitorAddresses=   letterMonitorAddresses.concat(spawner.getMonitorAddress3());
-
   // console.log(letterMonitorAddresses);
   demand[c] = new Array();
   blockChainDemand[c]= new Array();           /* Create matrix to store demand data points */
@@ -67,17 +66,21 @@ lineReader = require('readline').createInterface({
 });
 
 lineReader.on('line', function (line) {
-  //TODO: read information and send information to contracts
-  //TODO: Wait for TICK to occur, then retrieve graph curves from letter factories
-  //TODO: retrieve graph curves and what not, send the information to python-shell
-  //TODO: based on what python-shell returned call the contracts and set some variables there.
-
+  console.log("\nIterations : " + iterations.toString()+ "\n")
   words = tokenizer.tokenize(line);
+
   for (w = 0; w < words.length; w++) {                            /* Loop through all words in current line */
+
     currentWord = words[w].toLowerCase();
+    // currentWord =word.replace(/[^A-Za-z0-9]/g, '');
+
+    console.log(currentWord);
     uniqueLetters = [];
     amounts = [];
     for (l = 0; l < currentWord.length; l++) {                    /* Loop through all letters in current word to count occurrences */
+      if (alphabet.indexOf(currentWord[l]) == -1) {
+        continue;
+      }
       index = uniqueLetters.indexOf(currentWord[l]);              /* Find index of letter in list of unique letters */
       if (index == -1) {                                          /* If it's not there */
         uniqueLetters.push(alphabet.indexOf(currentWord[l]));     /* Then add it to the list */
@@ -88,18 +91,21 @@ lineReader.on('line', function (line) {
     }
 
     /* Increment the demand */
+    console.log(uniqueLetters + "\n")
+    console.log(amounts + "\n")
+
     var demandHash = wordCompany.incrementDemand(uniqueLetters, amounts);
 
     // for (a = 0; a < demand.length; a++) {
     //   demand[uniqueLetters[a]].push(amounts[a]);
     //   // var letterHash = demand
     // }
-    while (web3.eth.getTransaction(demandHash).blockNumber == null)
+    while (web3.eth.getTransactionReceipt(demandHash) == null)
     {       process.stdout.write("Waiting for demands to increase.                   \r");}
 
     var sellHash = letterCompany.sellifReady();
 
-    while(web3.eth.getTransaction(sellHash).blockNumber==null)
+    while(web3.eth.getTransactionReceipt(sellHash)==null)
     {
       process.stdout.write("Waiting for letters to be sold.                            .\r");
     }
@@ -129,23 +135,22 @@ lineReader.on('line', function (line) {
     /* Make orders */
     var diffLetters
     var productionHash = letterCompany.startProduction(lettersToProduce);
-    while (web3.eth.getTransaction(productionHash).blockNumber == null);
-  }
+    while (web3.eth.getTransactionReceipt(productionHash) == null);
     {
       process.stdout.write("Waiting for production to start \r");
 
     }
 
-
+  }
     /* Now tick the time */
     var wCtimeHash =wordCompany.advanceTime();
-    while( web3.eth.getTransaction(wCtimeHash).blockNumber == null)
+    while( web3.eth.getTransactionReceipt(wCtimeHash) == null)
     {
       process.stdout.write("Waiting for word company time to advance                    \r");
 
     }
     var lCtimeHash = letterCompany.advanceTime();
-    while (web3.eth.getTransaction(lCtimeHash).blockNumber == null)
+    while (web3.eth.getTransactionReceipt(lCtimeHash) == null)
     {
         process.stdout.write("Waiting for lettercompany time to advance               \r");
     }
@@ -154,7 +159,7 @@ lineReader.on('line', function (line) {
     for (c = 0; c < alphabet.length; c++) {
       MonitortimeHash[c]=letterMonitor.at(letterMonitorAddresses[c]).tickTime();     /* Set the production time of the letters to some random number between 1 and 10 */
     }
-    while (web3.eth.getTransaction(MonitortimeHash[25]).blockNumber == null)
+    while (web3.eth.getTransactionReceipt(MonitortimeHash[25]) == null)
   {
     process.stdout.write("Waiting for monitors time to advance   \r");
 
