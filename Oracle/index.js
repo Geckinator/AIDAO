@@ -116,6 +116,7 @@ lineReader.on('line', function (line) {
 
       for (a = 0; a < letterMonitorAddresses.length; a++) {
         var temp = letterMonitor.at(letterMonitorAddresses[a]).currentDemand();
+        console.log(temp.toString());
         blockChainDemand[a].push(temp)
         if (iterations > 30)
         {
