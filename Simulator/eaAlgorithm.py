@@ -21,18 +21,16 @@ class EvolutionaryAlgorithm(object):
         self.sim = simulator
         self.words = word_depth
 
-    def evolve(self, num_of_generations):
+    def evolve(self, num_of_generations, verbose=False):
         self.initialize_population()
         for i in xrange(num_of_generations):
-            print 'gen', i
-            self.evolution_loop()
+            if verbose:
+                print 'gen:', i, 'max fitness:', self.fittest[1]
+            parents = self.select_parents()
+            self.recombination(parents)
+            self.mutation()
+            self.select_survivors()
         return self.fittest
-
-    def evolution_loop(self):
-        parents = self.select_parents()
-        self.recombination(parents)
-        self.mutation()
-        self.select_survivors()
 
     def get_random_chromosome(self):
         chromosome = [self.rand.randint(self.min, self.max) for _ in xrange(self.d)]
@@ -87,7 +85,7 @@ class EvolutionaryAlgorithm(object):
     def mutate(self, ind):
         for i in range(self.d):
             if self.rand.random() < self.mut_rate:
-                self.pop[ind][0][i] = self.rand.randint(1, self.d)
+                self.pop[ind][0][i] = self.rand.randint(self.min, self.max)
 
     def recombination(self, parents):
         for i in xrange(self.l / 2):
@@ -108,7 +106,7 @@ class EvolutionaryAlgorithm(object):
 
 if __name__ == '__main__':
     rand = Random()
-    prod_times = [rand.randint(5, 15) for _ in letters]
+    prod_times = read_production_times()
     factory = MegaFactory(500, prod_times)
     sim = Simulator('Alice.txt', factory, 5, 15, rand)
     mu1 = int(sys.argv[1])
@@ -127,7 +125,7 @@ if __name__ == '__main__':
     print fittest[0]
 
     with open('ea.txt', 'a') as fi:
-        fi.write('m: %d l: %d d: %d domain:[%d,%d] rec_rate: %.1f mut_rate: %.2f words: %d\n' % (mu1, lamda1, d, min_value, max_value, rec_rate, mut_rate, words_to_read))
+        fi.write('m: %d l: %d d: %d gens: %d domain:[%d,%d] rec_rate: %.1f mut_rate: %.2f words: %d\n' % (mu1, lamda1, d, generations, min_value, max_value, rec_rate, mut_rate, words_to_read))
         fi.write(str(fittest[1]) + '\n')
         fi.write(', '.join(str(x) for x in fittest[0]) + '\n')
         fi.write(', '.join(str(x) for x in prod_times) + '\n\n')

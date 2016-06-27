@@ -11,22 +11,29 @@ class MegaFactory(object):
         self.prod_times = dict(zip(letters, production_times))
         self.unmet_demand = Counter()
         self.stock = Counter()
-        self.rates = dict.fromkeys(letters)
         self.production_queue = defaultdict(list)
         self.free_slots = capacity
         self.mean_service_time = 0
         self.counts = Counter()
+        self.train_counts = Counter()
         self.accum_money = 0
+        self.trained_on = 0
 
     def initialize(self):
         self.unmet_demand = Counter()
         self.stock = Counter()
-        self.rates = dict.fromkeys(letters)
         self.production_queue = defaultdict(list)
         self.free_slots = self.capacity
         self.mean_service_time = 0
-        self.counts = Counter()
+        if self.trained_on != 0:
+            self.counts = self.train_counts
+        else:
+            self.counts = Counter()
         self.accum_money = 0
+
+    def incorporate_train_counts(self, counts, train_set_length):
+        self.counts = counts
+        self.trained_on = train_set_length
 
     def insert_into_production_slot(self, letter, amount, current_time):
         if amount > self.free_slots:
@@ -40,7 +47,9 @@ class MegaFactory(object):
         """
         :type plan: integer
         """
-        if plan == 1:
+        if plan == 0:
+            pass
+        elif plan == 1:
             self.react_to_incoming_word(letter_distribution, current_time)
         elif plan == 2:
             self.react_to_incoming_word(letter_distribution, current_time)
@@ -84,11 +93,10 @@ class MegaFactory(object):
                         self.insert_into_production_slot(l, 1, schedule_time)
 
     def act_with_parameter_vector(self, chromosome, current_time):
-        parameters = dict(zip(letters, chromosome))
         if self.free_slots > self.capacity / 2:
-            for l in letters:
+            for i, l in enumerate(letters):
                 if self.get_rate(l, current_time) != 0:
-                    if self.stock[l] + self.get_number_under_production(l) < parameters[l]:
+                    if self.stock[l] + self.get_number_under_production(l) < chromosome[i]:
                         schedule_time = int(1 / self.get_rate(l, current_time)) - self.prod_times[l]
                         if schedule_time < 0:
                             schedule_time = current_time
@@ -100,7 +108,7 @@ class MegaFactory(object):
         return sum(order[0] for order in self.production_queue[letter])
 
     def get_rate(self, letter, current_time):
-        return self.counts[letter] / float(current_time)
+        return self.counts[letter] / float(current_time + self.trained_on)
 
     def get_stock_number(self, letter):
         if letter not in self.stock:
@@ -134,9 +142,3 @@ class MegaFactory(object):
             if key not in self.stock or self.stock[key] < value:
                 return False
         return True
-
-    def fill_missing_letters(self, word, current_time):
-        for char in word:
-            diff = self.unmet_demand[char] - (self.get_number_under_production(char) + self.stock[char])
-            if diff > 0:
-                self.insert_into_production_slot(char, diff, current_time)

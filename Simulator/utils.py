@@ -2,7 +2,7 @@ __author__ = 'Konstantinos'
 
 import re
 from math import sqrt
-import numpy as np
+from collections import Counter
 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
            'w', 'x', 'y', 'z']
@@ -17,17 +17,40 @@ def generate_word(a_file):
             yield ''.join([char for char in w.lower() if char.isalpha()])
 
 
-def replicate(simulator, words_to_read, iterations, plan):
-    with open('results' + str(plan) + '.txt', 'a') as fi:
-        obs = np.empty(iterations)
-        for i in xrange(iterations):
-            simulator.rand.seed(i)
-            simulator.factory.initialize_random_prod_times(simulator.min, simulator.max, simulator.rand)
-            obs[i] = simulator.run(words_to_read, plan, verbose=False)
-        mean = sum(obs) / float(iterations)
-        std = sqrt(sum((ob - mean) ** 2 for ob in obs) / float(iterations))
-        fi.write('words: %d reps: %d, mean: %d std: %.2f min %d max %d\n\n' % (words_to_read, iterations, mean, std, simulator.min, simulator.max))
+def replicate(simulator, offset, words_to_read, iterations, plan):
+    obs = []
+    for i in xrange(iterations):
+        simulator.factory.counts = simulator.factory.train_counts
+        simulator.rand.seed(i)
+        obs.append(simulator.run(offset, words_to_read, plan, verbose=False))
+    mean = sum(obs) / float(iterations)
+    std = sqrt(sum((ob - mean) ** 2 for ob in obs) / float(iterations))
     return mean, std
+
+
+def read_production_times():
+    with open('prod_times.txt', 'r') as f:
+        line = f.readline().split()
+    print line
+    res = map(int, line)
+    return res
+
+
+def get_counts_on_train_set(a_text_file, words_to_read, verbose=False):
+    """
+    :param a_text_file: String
+    :param words_to_read: integer
+    """
+    counts = Counter()
+    f = open(a_text_file, 'r')
+    for i, word in enumerate(generate_word(f)):
+        counts += Counter(word)
+        if i == words_to_read - 1:
+            break
+    if verbose:
+        for c in letters:
+            print counts[c] / float(words_to_read),
+    return counts
 
 
 def stochastic_universal_sampling(cumul_probs, num_of_samples, a_rand):
@@ -42,18 +65,3 @@ def stochastic_universal_sampling(cumul_probs, num_of_samples, a_rand):
             current_member += 1
         i += 1
     return indices
-"""
-double rand = aRandom.nextDouble() / numberOfSamples;
-    int[] indicesSampled = new int[numberOfSamples];
-    int currentMember = 1;
-    int i = 1;
-    // stochastic universal sampling algorithm
-    while (currentMember <= numberOfSamples){
-        while (rand <= cumulProbs[i-1]){
-            indicesSampled[currentMember-1] = i-1;
-            rand += 1.0/numberOfSamples;
-            currentMember ++;
-        }
-        i ++;
-    }
-    return indicesSampled;"""
