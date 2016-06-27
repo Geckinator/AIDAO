@@ -1,6 +1,6 @@
 # AI:DAO Project, UvA, June 2016
 
-This is a project by Andi Aliko, Kai Lonning, Lena Herstix and Konstantinos Lampridis
+This is a project by Andi Aliko, Kai Lønning, Lena Herstix and Konstantinos Lampridis
 
 
 Project includes:
