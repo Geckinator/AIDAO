@@ -83,7 +83,7 @@ def main():
     nEmptySlot = int(args['nEmptySlot'])
 
     # Do regressin on all letters, storing predictions and labeling them with the corresponding letter
-    predictions = [(predict_ridge_reg(demand, productionTimes[letter], letter, True), letter) for letter in range(0, demand.shape[0])]
+    predictions = [(predict_ridge_reg(demand, productionTimes[letter], letter, False), letter) for letter in range(0, demand.shape[0])]
 
     # Pick nEmptySlot of the letters with highest predictions
     lettersToProduce = []
@@ -92,7 +92,7 @@ def main():
         lettersToProduce.append(predictions[0][1])
         predictions[0] = (predictions[0][0] - 1, predictions[0][1])
 
-    print (lettersToProduce)
+    print lettersToProduce
 
 
 

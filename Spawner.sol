@@ -181,6 +181,7 @@ contract LetterCompany {
       ) {
       bank = _bank ;
       ticker = 0;
+      maxSlots =10;
       wordCompany = _wordCompany;
       for (uint8 x = 0 ; x< _letterMonitors.length; x++)
       {
