@@ -73,7 +73,7 @@ lineReader.on('line', function (line) {
 
     /* Make informed decision using python Oracle */
     child_process = require('child_process');
-    history = child_process.execSync('python input.py -t ' + JSON.stringify(demand) + JSON.stringify(productionTimes) + JSON.stringify(nEmptySlot));
+    history = child_process.execSync('python ridge_regression.py -t ' + JSON.stringify(demand) + JSON.stringify(productionTimes) + JSON.stringify(nEmptySlot));
     /* Make orders */
     letterCompany.startProduction(history[0], history[1]);
 
